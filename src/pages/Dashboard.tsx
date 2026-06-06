@@ -79,7 +79,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (p: Page) => voi
 
       {/* Setup banner */}
       {!hasProfile && (
-        <div className="fade-up glass-card" style={{ padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', background: 'rgba(0,113,227,0.08)', border: '1px solid rgba(0,113,227,0.2)' }}>
+        <div style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 16, boxShadow: '0 2px 20px rgba(0,0,0,0.08)' }} style={{ padding: '16px 20px', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap', background: 'rgba(0,113,227,0.08)', border: '1px solid rgba(0,113,227,0.2)' }}>
           <span style={{ fontSize: 24 }}>👋</span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 'var(--text-15)', fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>Complete your business profile</div>
@@ -94,7 +94,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (p: Page) => voi
       {/* ── KPI row ── */}
       <div className="stats-grid fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 36 }}>
         {KPIS.map((k, i) => (
-          <div key={k.label} className="glass-card fade-up" style={{ padding: '20px 18px', animationDelay: `${i*60}ms` }}>
+          <div key={k.label} style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 16, boxShadow: '0 2px 20px rgba(0,0,0,0.08)' }} style={{ padding: '20px 18px', animationDelay: `${i*60}ms` }}>
             <div style={{ width: 10, height: 10, borderRadius: 5, background: k.color, marginBottom: 14, boxShadow: `0 0 8px ${k.color}80` }} />
             <div style={{ fontSize: 'clamp(24px,4vw,34px)', fontWeight: 700, color: 'var(--text-primary)', letterSpacing: '-0.02em', fontFamily: 'var(--font-rounded)', lineHeight: 1.1, marginBottom: 4 }}>
               {k.value}
@@ -112,7 +112,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (p: Page) => voi
       </h2>
       <div className="modules-grid fade-up" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 12 }}>
         {MODULES.map((m, i) => (
-          <div key={m.label} className={`glass-card fade-up${m.ready ? '' : ''}`}
+          <div key={m.label} style={{ background: 'rgba(255,255,255,0.85)', backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)', border: '1px solid rgba(255,255,255,0.3)', borderRadius: 16, boxShadow: '0 2px 20px rgba(0,0,0,0.08)' }}
             style={{ padding: '20px 22px', display: 'flex', alignItems: 'center', gap: 14, cursor: m.ready ? 'pointer' : 'default', opacity: m.ready ? 1 : 0.5, animationDelay: `${(i+4)*60}ms` }}
             onClick={() => m.ready && onNavigate(m.page)}>
             <div style={{ width: 44, height: 44, borderRadius: 12, background: `${m.color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, border: `1px solid ${m.color}20` }}>

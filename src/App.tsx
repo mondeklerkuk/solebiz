@@ -33,7 +33,7 @@ function Sidebar({ page, setPage, user, signOut }: any) {
   const initial = biz.charAt(0).toUpperCase();
 
   return (
-    <aside className="sidebar">
+    <aside className="sidebar" style={{ background: 'rgba(28,28,30,0.96)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderRight: '0.5px solid rgba(255,255,255,0.08)' }}>
       <div style={{ padding: '28px 14px 0', flex: 1, display: 'flex', flexDirection: 'column' }}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32, padding: '0 6px' }}>
@@ -81,7 +81,7 @@ function BottomTabBar({ page, setPage }: any) {
 
   return (
     <>
-      <div className="tab-bar">
+      <div className="tab-bar" style={{ display: 'block', position: 'fixed', bottom: 0, left: 0, right: 0, height: 83, background: 'rgba(28,28,30,0.92)', backdropFilter: 'blur(20px) saturate(180%)', WebkitBackdropFilter: 'blur(20px) saturate(180%)', borderTop: '0.5px solid rgba(255,255,255,0.15)', zIndex: 100 }}>
         <div className="tab-bar-inner">
           {MAIN_NAV.map(n => (
             <button key={n.id} className={`tab-item${page === n.id ? ' active' : ''}`} onClick={() => setPage(n.id)}>
