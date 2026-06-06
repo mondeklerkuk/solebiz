@@ -10,12 +10,12 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  enquiry:    { bg: '#F2F2F7', text: '#3C3C43', border: '#E5E5EA' },
-  quoted:     { bg: '#EBF5FF', text: '#007AFF', border: '#BFD7FF' },
-  confirmed:  { bg: '#EDFAF1', text: '#34C759', border: '#B7EFC5' },
-  in_progress:{ bg: '#FFF5E6', text: '#FF9500', border: '#FFD9A0' },
-  completed:  { bg: '#F5F0FF', text: '#AF52DE', border: '#DEC5F5' },
-  archived:   { bg: '#F2F2F7', text: '#8E8E93', border: '#E5E5EA' },
+  enquiry:    { bg: '#F8FAFC', text: '#1E293B', border: '#E2E8F0' },
+  quoted:     { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
+  confirmed:  { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
+  in_progress:{ bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA' },
+  completed:  { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
+  archived:   { bg: '#F8FAFC', text: '#94A3B8', border: '#E2E8F0' },
 };
 
 export default function JobsPage() {
@@ -72,10 +72,10 @@ export default function JobsPage() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: '32px 28px', maxWidth: 1200, margin: '0 auto' },
+  page: { padding: '36px 40px', maxWidth: 1200, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
-  title: { fontSize: 28, fontWeight: 700, color: '#1C1C1E', margin: 0, letterSpacing: '-0.5px' },
-  subtitle: { fontSize: 14, color: '#8E8E93', margin: '4px 0 0' },
-  addBtn: { background: '#007AFF', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 20px', fontSize: 15, fontWeight: 600, cursor: 'pointer' },
-  loading: { textAlign: 'center', color: '#8E8E93', padding: 48 },
+  title: { fontSize: 24, fontWeight: 700, color: '#0F172A', margin: 0 },
+  subtitle: { fontSize: 14, color: '#64748B', margin: '4px 0 0' },
+  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  loading: { textAlign: 'center', color: '#64748B', padding: 48 },
 };

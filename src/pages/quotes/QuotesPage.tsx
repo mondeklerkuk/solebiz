@@ -4,8 +4,8 @@ import { useAuth } from '../../context/AuthContext';
 import QuoteModal from './QuoteModal';
 
 export const QUOTE_STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  draft:    { bg: '#F2F2F7', text: '#3C3C43', border: '#E5E5EA' },
-  sent:     { bg: '#EFF6FF', text: '#1D4ED8', border: '#BFDBFE' },
+  draft:    { bg: '#F8FAFC', text: '#1E293B', border: '#E2E8F0' },
+  sent:     { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
   viewed:   { bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA' },
   accepted: { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
   declined: { bg: '#FEF2F2', text: '#DC2626', border: '#FECACA' },
@@ -63,11 +63,24 @@ export default function QuotesPage() {
         </div>
         <button style={s.addBtn} onClick={() => { setEditingQuote(null); setModalOpen(true); }}>+ New Quote</button>
       </div>
+
+      {/* Stats */}
       <div style={s.statsRow}>
-        <div style={s.stat}><div style={s.statLabel}>Total Value</div><div style={s.statValue}>£{totalValue.toFixed(2)}</div></div>
-        <div style={s.stat}><div style={s.statLabel}>Paid</div><div style={{ ...s.statValue, color: '#15803D' }}>£{paidValue.toFixed(2)}</div></div>
-        <div style={s.stat}><div style={s.statLabel}>Outstanding</div><div style={{ ...s.statValue, color: '#C2410C' }}>£{(totalValue - paidValue).toFixed(2)}</div></div>
+        <div style={s.stat}>
+          <div style={s.statLabel}>Total Value</div>
+          <div style={s.statValue}>£{totalValue.toFixed(2)}</div>
+        </div>
+        <div style={s.stat}>
+          <div style={s.statLabel}>Paid</div>
+          <div style={{ ...s.statValue, color: '#15803D' }}>£{paidValue.toFixed(2)}</div>
+        </div>
+        <div style={s.stat}>
+          <div style={s.statLabel}>Outstanding</div>
+          <div style={{ ...s.statValue, color: '#C2410C' }}>£{(totalValue - paidValue).toFixed(2)}</div>
+        </div>
       </div>
+
+      {/* Filters */}
       <div style={s.filters}>
         {(['all', 'quotes', 'invoices'] as const).map(f => (
           <button key={f} style={{ ...s.filterBtn, ...(filter === f ? s.filterActive : {}) }} onClick={() => setFilter(f)}>
@@ -75,13 +88,22 @@ export default function QuotesPage() {
           </button>
         ))}
       </div>
-      {loading ? <div style={s.loading}>Loading...</div> : filtered.length === 0 ? (
-        <div style={s.empty}><div style={{ fontSize: 40, marginBottom: 12 }}>📋</div><p>No documents yet. Create your first quote!</p></div>
+
+      {/* Table */}
+      {loading ? (
+        <div style={s.loading}>Loading...</div>
+      ) : filtered.length === 0 ? (
+        <div style={s.empty}>
+          <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
+          <p>No documents yet. Create your first quote!</p>
+        </div>
       ) : (
         <div style={s.table}>
-          <div style={s.tableHeader}><span>Number</span><span>Client</span><span>Date</span><span>Total</span><span>Status</span><span></span></div>
+          <div style={s.tableHeader}>
+            <span>Number</span><span>Client</span><span>Date</span><span>Total</span><span>Status</span><span></span>
+          </div>
           {filtered.map(q => {
-            const col = QUOTE_STATUS_COLORS[q.status] || QUOTE_STATUS_COLORS.draft;
+            const col = QUOTE_STATUS_COLORS[q.status];
             return (
               <div key={q.id} style={s.tableRow} onClick={() => { setEditingQuote(q); setModalOpen(true); }}>
                 <span style={s.quoteNum}>{q.quote_number}</span>
@@ -97,36 +119,43 @@ export default function QuotesPage() {
           })}
         </div>
       )}
+
       {modalOpen && (
-        <QuoteModal quote={editingQuote} clients={clients} userId={user.id} userEmail={user.email || ''}
-          onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); fetchQuotes(); }} />
+        <QuoteModal
+          quote={editingQuote}
+          clients={clients}
+          userId={user.id}
+          userEmail={user.email || ''}
+          onClose={() => setModalOpen(false)}
+          onSaved={() => { setModalOpen(false); fetchQuotes(); }}
+        />
       )}
     </div>
   );
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 24, maxWidth: 1000, margin: '0 auto' },
+  page: { padding: '36px 40px', maxWidth: 1000, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  title: { fontSize: 28, fontWeight: 700, color: '#1C1C1E', margin: 0, letterSpacing: '-0.5px' },
-  subtitle: { fontSize: 14, color: '#8E8E93', margin: '4px 0 0' },
-  addBtn: { background: '#007AFF', color: '#fff', border: 'none', borderRadius: 12, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  title: { fontSize: 24, fontWeight: 700, color: '#0F172A', margin: 0 },
+  subtitle: { fontSize: 14, color: '#64748B', margin: '4px 0 0' },
+  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
   statsRow: { display: 'flex', gap: 16, marginBottom: 20 },
-  stat: { flex: 1, background: '#fff', borderRadius: 14, padding: '16px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
-  statLabel: { fontSize: 12, color: '#8E8E93', marginBottom: 4 },
-  statValue: { fontSize: 22, fontWeight: 700, color: '#1C1C1E' },
+  stat: { flex: 1, background: '#fff', borderRadius: 12, padding: '16px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
+  statLabel: { fontSize: 12, color: '#64748B', marginBottom: 4 },
+  statValue: { fontSize: 22, fontWeight: 700, color: '#0F172A' },
   filters: { display: 'flex', gap: 8, marginBottom: 16 },
-  filterBtn: { padding: '6px 16px', borderRadius: 20, border: '1px solid #E5E7EB', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#8E8E93' },
-  filterActive: { background: '#007AFF', color: '#fff', border: '1px solid #1A56DB' },
-  loading: { textAlign: 'center', color: '#8E8E93', padding: 48 },
-  empty: { textAlign: 'center', color: '#8E8E93', padding: 48 },
-  table: { background: '#fff', borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '120px 1fr 130px 100px 140px 24px', gap: 12, padding: '12px 20px', background: '#F2F2F7', fontSize: 12, fontWeight: 600, color: '#8E8E93', borderBottom: '1px solid #F3F4F6' },
-  tableRow: { display: 'grid', gridTemplateColumns: '120px 1fr 130px 100px 140px 24px', gap: 12, padding: '14px 20px', alignItems: 'center', borderBottom: '1px solid #F9FAFB', cursor: 'pointer' },
-  quoteNum: { fontSize: 13, fontWeight: 600, color: '#007AFF' },
-  clientName: { fontSize: 14, color: '#1C1C1E' },
-  date: { fontSize: 13, color: '#8E8E93' },
-  amount: { fontSize: 14, fontWeight: 600, color: '#1C1C1E' },
+  filterBtn: { padding: '6px 16px', borderRadius: 20, border: '1px solid #E5E7EB', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#64748B' },
+  filterActive: { background: '#2563EB', color: '#fff', border: '1px solid #1A56DB' },
+  loading: { textAlign: 'center', color: '#64748B', padding: 48 },
+  empty: { textAlign: 'center', color: '#94A3B8', padding: 48 },
+  table: { background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
+  tableHeader: { display: 'grid', gridTemplateColumns: '120px 1fr 120px 100px 130px 24px', gap: 12, padding: '12px 20px', background: '#F8FAFC', fontSize: 12, fontWeight: 600, color: '#64748B', borderBottom: '1px solid #F3F4F6' },
+  tableRow: { display: 'grid', gridTemplateColumns: '120px 1fr 120px 100px 130px 24px', gap: 12, padding: '14px 20px', alignItems: 'center', borderBottom: '1px solid #F9FAFB', cursor: 'pointer' },
+  quoteNum: { fontSize: 13, fontWeight: 600, color: '#2563EB' },
+  clientName: { fontSize: 14, color: '#0F172A' },
+  date: { fontSize: 13, color: '#64748B' },
+  amount: { fontSize: 14, fontWeight: 600, color: '#0F172A' },
   badge: { fontSize: 11, padding: '3px 8px', borderRadius: 20, fontWeight: 500, display: 'inline-block' },
-  arrow: { fontSize: 18, color: '#8E8E93', textAlign: 'center' },
+  arrow: { fontSize: 18, color: '#94A3B8', textAlign: 'center' },
 };
