@@ -3,226 +3,208 @@ import { supabase } from '../../lib/supabase';
 import { QUOTE_STATUS_LABELS } from './QuotesPage';
 
 const STATUSES = ['draft','sent','viewed','accepted','declined','invoiced','paid'];
-const VAT_RATE = 20;
 
-function generateQuoteNumber(isInvoice: boolean, existing: any[]) {
-  const prefix = isInvoice ? 'INV' : 'Q';
+function nextNum(isInv: boolean, existing: any[]) {
+  const prefix = isInv ? 'INV' : 'Q';
   const year = new Date().getFullYear();
-  const nums = existing
-    .filter((q: any) => q.quote_number?.startsWith(`${prefix}-${year}`))
+  const nums = existing.filter((q: any) => q.quote_number?.startsWith(`${prefix}-${year}`))
     .map((q: any) => parseInt(q.quote_number.split('-')[2] || '0'));
   const next = nums.length > 0 ? Math.max(...nums) + 1 : 1;
-  return `${prefix}-${year}-${String(next).padStart(3, '0')}`;
+  return `${prefix}-${year}-${String(next).padStart(3,'0')}`;
 }
 
-export default function QuoteModal({ quote, clients, userId, userEmail, onClose, onSaved }: any) {
+export default function QuoteModal({ quote, clients, userId, onClose, onSaved }: any) {
   const isEdit = !!quote;
   const [isInvoice, setIsInvoice] = useState(quote?.is_invoice || false);
   const [status, setStatus] = useState(quote?.status || 'draft');
   const [clientId, setClientId] = useState(quote?.client_id || '');
-  const [quoteNumber, setQuoteNumber] = useState(quote?.quote_number || '');
+  const [qNum, setQNum] = useState(quote?.quote_number || '');
   const [issueDate, setIssueDate] = useState(quote?.issue_date || new Date().toISOString().split('T')[0]);
   const [expiryDate, setExpiryDate] = useState(quote?.expiry_date || '');
   const [dueDate, setDueDate] = useState(quote?.due_date || '');
   const [notes, setNotes] = useState(quote?.notes || '');
-  const [items, setItems] = useState<any[]>(quote?.items || [{ description: '', quantity: 1, unit_price: 0 }]);
+  const [vatEnabled, setVatEnabled] = useState(quote ? (quote.vat_rate || 0) > 0 : true);
+  const [vatRate] = useState(20);
+  const [items, setItems] = useState<any[]>([{ description: '', quantity: 1, unit_price: 0 }]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [allQuotes, setAllQuotes] = useState<any[]>([]);
+  const [newClient, setNewClient] = useState('');
+  const [addingClient, setAddingClient] = useState(false);
 
   useEffect(() => {
     supabase.from('quotes').select('quote_number').eq('user_id', userId).then(({ data }) => {
       setAllQuotes(data || []);
-      if (!isEdit) setQuoteNumber(generateQuoteNumber(isInvoice, data || []));
+      if (!isEdit) setQNum(nextNum(isInvoice, data || []));
     });
     if (isEdit && quote.id) loadItems();
   }, []);
 
-  useEffect(() => {
-    if (!isEdit) setQuoteNumber(generateQuoteNumber(isInvoice, allQuotes));
-  }, [isInvoice]);
+  useEffect(() => { if (!isEdit) setQNum(nextNum(isInvoice, allQuotes)); }, [isInvoice]);
 
   async function loadItems() {
     const { data } = await supabase.from('quote_items').select('*').eq('quote_id', quote.id).order('sort_order');
-    if (data && data.length > 0) setItems(data.map((i: any) => ({ ...i, unit_price: i.unit_price })));
+    if (data?.length) setItems(data);
   }
 
-  const subtotal = items.reduce((sum, i) => sum + (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0), 0);
-  const vatAmount = subtotal * (VAT_RATE / 100);
-  const total = subtotal + vatAmount;
+  const subtotal = items.reduce((sum, i) => sum + (parseFloat(i.quantity)||0) * (parseFloat(i.unit_price)||0), 0);
+  const vatAmt = vatEnabled ? subtotal * (vatRate / 100) : 0;
+  const total = subtotal + vatAmt;
 
-  function updateItem(idx: number, field: string, val: any) {
-    setItems(prev => prev.map((item, i) => i === idx ? { ...item, [field]: val } : item));
-  }
-  function addItem() { setItems(prev => [...prev, { description: '', quantity: 1, unit_price: 0 }]); }
-  function removeItem(idx: number) { setItems(prev => prev.filter((_, i) => i !== idx)); }
+  const upd = (i: number, k: string, v: any) => setItems(p => p.map((x, j) => j === i ? { ...x, [k]: v } : x));
 
-  async function handleSave() {
-    if (!quoteNumber) { setError('Quote number is required'); return; }
+  async function save() {
+    if (!qNum) { setError('Quote number required'); return; }
     setSaving(true); setError('');
-
     const payload = {
-      user_id: userId, client_id: clientId || null, quote_number: quoteNumber,
+      user_id: userId, client_id: clientId || null, quote_number: qNum,
       status, is_invoice: isInvoice, issue_date: issueDate,
       expiry_date: expiryDate || null, due_date: dueDate || null,
-      notes: notes || null, subtotal, vat_rate: VAT_RATE, vat_amount: vatAmount, total,
+      notes: notes || null, subtotal,
+      vat_rate: vatEnabled ? vatRate : 0,
+      vat_amount: vatAmt, total,
       updated_at: new Date().toISOString(),
     };
-
-    let quoteId = quote?.id;
+    let qId = quote?.id;
     if (isEdit) {
-      const { error: e } = await supabase.from('quotes').update(payload).eq('id', quoteId);
-      if (e) { setError(e.message); setSaving(false); return; }
+      await supabase.from('quotes').update(payload).eq('id', qId);
     } else {
-      const { data, error: e } = await supabase.from('quotes').insert(payload).select().single();
-      if (e) { setError(e.message); setSaving(false); return; }
-      quoteId = data.id;
+      const { data } = await supabase.from('quotes').insert(payload).select().single();
+      qId = data?.id;
     }
-
-    // Save line items
-    await supabase.from('quote_items').delete().eq('quote_id', quoteId);
-    const lineItems = items
-      .filter(i => i.description.trim())
-      .map((i, idx) => ({
-        quote_id: quoteId, description: i.description,
+    if (qId) {
+      await supabase.from('quote_items').delete().eq('quote_id', qId);
+      const lineItems = items.filter(i => i.description?.trim()).map((i, idx) => ({
+        quote_id: qId, description: i.description,
         quantity: parseFloat(i.quantity) || 1,
         unit_price: parseFloat(i.unit_price) || 0,
-        total: (parseFloat(i.quantity) || 0) * (parseFloat(i.unit_price) || 0),
+        total: (parseFloat(i.quantity)||0) * (parseFloat(i.unit_price)||0),
         sort_order: idx,
       }));
-    if (lineItems.length > 0) await supabase.from('quote_items').insert(lineItems);
-
-    setSaving(false);
-    onSaved();
+      if (lineItems.length) await supabase.from('quote_items').insert(lineItems);
+    }
+    setSaving(false); onSaved();
   }
 
-  async function handleDelete() {
+  async function del() {
     if (!confirm('Delete this document?')) return;
     await supabase.from('quote_items').delete().eq('quote_id', quote.id);
     await supabase.from('quotes').delete().eq('id', quote.id);
     onSaved();
   }
 
-  async function convertToInvoice() {
-    const invNumber = generateQuoteNumber(true, allQuotes);
-    const { error: e } = await supabase.from('quotes').update({
-      is_invoice: true, status: 'invoiced', quote_number: invNumber,
-      invoice_date: new Date().toISOString().split('T')[0],
-      updated_at: new Date().toISOString(),
-    }).eq('id', quote.id);
-    if (!e) onSaved();
-  }
-
-  async function markPaid() {
-    await supabase.from('quotes').update({ status: 'paid', paid_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq('id', quote.id);
-    onSaved();
+  async function addClient() {
+    if (!newClient.trim()) return;
+    setAddingClient(true);
+    const { data } = await supabase.from('clients').insert({ name: newClient.trim(), user_id: userId, created_at: new Date().toISOString() }).select().single();
+    if (data) setClientId(data.id);
+    setNewClient(''); setAddingClient(false);
   }
 
   return (
-    <div style={s.overlay} onClick={onClose}>
-      <div style={s.modal} onClick={e => e.stopPropagation()}>
-        <div style={s.modalHeader}>
-          <h2 style={s.modalTitle}>{isEdit ? (quote.is_invoice ? '🧾 Invoice' : '📋 Quote') : 'New Quote'} {isEdit ? quote.quote_number : ''}</h2>
-          <button style={s.closeBtn} onClick={onClose}>✕</button>
+    <div style={s.overlay} onClick={e => e.target === e.currentTarget && onClose()}>
+      <div style={s.modal}>
+        <div style={s.hdr}>
+          <h2 style={s.htitle}>{isEdit ? (quote.is_invoice ? '🧾 Invoice' : '📋 Quote') : 'New Document'} {isEdit ? quote.quote_number : ''}</h2>
+          <button style={s.x} onClick={onClose}>✕</button>
         </div>
 
         <div style={s.body}>
-          {error && <div style={s.error}>{error}</div>}
+          {error && <div style={s.err}>{error}</div>}
 
-          {/* Quick actions for existing docs */}
-          {isEdit && (
-            <div style={s.actions}>
-              {!quote.is_invoice && quote.status === 'accepted' && (
-                <button style={s.actionBtn} onClick={convertToInvoice}>🧾 Convert to Invoice</button>
-              )}
-              {quote.is_invoice && quote.status !== 'paid' && (
-                <button style={{ ...s.actionBtn, background: '#ECFDF5', color: '#065F46', border: '1px solid #6EE7B7' }} onClick={markPaid}>✅ Mark as Paid</button>
-              )}
-            </div>
-          )}
-
-          <div style={s.row}>
-            <div style={s.col}>
-              <label style={s.label}>Type</label>
+          {/* Type toggle */}
+          <Row>
+            <Col>
+              <L>Document type</L>
               <div style={s.toggle}>
-                <button style={{ ...s.toggleBtn, ...((!isInvoice) ? s.toggleActive : {}) }} onClick={() => !isEdit && setIsInvoice(false)}>Quote</button>
-                <button style={{ ...s.toggleBtn, ...(isInvoice ? s.toggleActive : {}) }} onClick={() => !isEdit && setIsInvoice(true)}>Invoice</button>
+                <button style={{ ...s.tBtn, ...((!isInvoice) ? s.tActive : {}) }} onClick={() => !isEdit && setIsInvoice(false)}>📋 Quote</button>
+                <button style={{ ...s.tBtn, ...(isInvoice ? s.tActive : {}) }} onClick={() => !isEdit && setIsInvoice(true)}>🧾 Invoice</button>
               </div>
-            </div>
-            <div style={s.col}>
-              <label style={s.label}>Status</label>
-              <select style={s.input} value={status} onChange={e => setStatus(e.target.value)}>
+            </Col>
+            <Col>
+              <L>Status</L>
+              <select style={s.inp} value={status} onChange={e => setStatus(e.target.value)}>
                 {STATUSES.map(st => <option key={st} value={st}>{QUOTE_STATUS_LABELS[st]}</option>)}
               </select>
-            </div>
-          </div>
+            </Col>
+          </Row>
 
-          <div style={s.row}>
-            <div style={s.col}>
-              <label style={s.label}>Number</label>
-              <input style={s.input} value={quoteNumber} onChange={e => setQuoteNumber(e.target.value)} />
-            </div>
-            <div style={s.col}>
-              <label style={s.label}>Client</label>
-              <select style={s.input} value={clientId} onChange={e => setClientId(e.target.value)}>
+          <Row>
+            <Col>
+              <L>Number</L>
+              <input style={s.inp} value={qNum} onChange={e => setQNum(e.target.value)} />
+            </Col>
+            <Col>
+              <L>Client</L>
+              <select style={s.inp} value={clientId} onChange={e => setClientId(e.target.value)}>
                 <option value="">No client</option>
                 {clients.map((c: any) => <option key={c.id} value={c.id}>{c.name}</option>)}
               </select>
-            </div>
+            </Col>
+          </Row>
+
+          {/* Quick add client */}
+          <div style={s.quickAdd}>
+            <input style={{ ...s.inp, flex: 1 }} placeholder="Quick add client name…" value={newClient} onChange={e => setNewClient(e.target.value)} onKeyDown={e => e.key === 'Enter' && addClient()} />
+            <button style={s.quickAddBtn} onClick={addClient} disabled={addingClient}>+ Add</button>
           </div>
 
-          <div style={s.row}>
-            <div style={s.col}>
-              <label style={s.label}>Issue date</label>
-              <input style={s.input} type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} />
-            </div>
-            <div style={s.col}>
-              <label style={s.label}>{isInvoice ? 'Due date' : 'Expiry date'}</label>
-              <input style={s.input} type="date" value={isInvoice ? dueDate : expiryDate}
+          <Row>
+            <Col>
+              <L>Issue date</L>
+              <input style={s.inp} type="date" value={issueDate} onChange={e => setIssueDate(e.target.value)} />
+            </Col>
+            <Col>
+              <L>{isInvoice ? 'Due date' : 'Expiry date'}</L>
+              <input style={s.inp} type="date" value={isInvoice ? dueDate : expiryDate}
                 onChange={e => isInvoice ? setDueDate(e.target.value) : setExpiryDate(e.target.value)} />
-            </div>
-          </div>
+            </Col>
+          </Row>
 
           {/* Line items */}
-          <label style={{ ...s.label, marginTop: 16 }}>Line Items</label>
-          <div style={s.itemsHeader}>
+          <L style={{ marginTop: 16 }}>Line Items</L>
+          <div style={s.itemsHdr}>
             <span style={{ flex: 3 }}>Description</span>
-            <span style={{ width: 70, textAlign: 'center' }}>Qty</span>
-            <span style={{ width: 90, textAlign: 'right' }}>Unit price</span>
+            <span style={{ width: 60, textAlign: 'center' }}>Qty</span>
+            <span style={{ width: 90, textAlign: 'right' }}>Unit £</span>
             <span style={{ width: 90, textAlign: 'right' }}>Total</span>
-            <span style={{ width: 28 }}></span>
+            <span style={{ width: 28 }} />
           </div>
-          {items.map((item, idx) => (
-            <div key={idx} style={s.itemRow}>
-              <input style={{ ...s.input, flex: 3 }} placeholder="Description" value={item.description} onChange={e => updateItem(idx, 'description', e.target.value)} />
-              <input style={{ ...s.input, width: 60, textAlign: 'center' }} type="number" min="1" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} />
-              <input style={{ ...s.input, width: 80, textAlign: 'right' }} type="number" min="0" step="0.01" placeholder="0.00" value={item.unit_price} onChange={e => updateItem(idx, 'unit_price', e.target.value)} />
-              <span style={{ width: 90, textAlign: 'right', fontSize: 14, color: '#1E293B', lineHeight: '38px' }}>
-                £{((parseFloat(item.quantity) || 0) * (parseFloat(item.unit_price) || 0)).toFixed(2)}
+          {items.map((item, i) => (
+            <div key={i} style={s.itemRow}>
+              <input style={{ ...s.inp, flex: 3 }} placeholder="Description of work" value={item.description} onChange={e => upd(i,'description',e.target.value)} />
+              <input style={{ ...s.inp, width: 55, textAlign: 'center' }} type="number" min="1" step="any" value={item.quantity} onChange={e => upd(i,'quantity',e.target.value)} />
+              <input style={{ ...s.inp, width: 85, textAlign: 'right' }} type="number" min="0" step="0.01" value={item.unit_price} onChange={e => upd(i,'unit_price',e.target.value)} />
+              <span style={{ width: 90, textAlign: 'right', fontSize: 14, fontWeight: 600, color: '#0F172A', lineHeight: '40px' }}>
+                £{((parseFloat(item.quantity)||0)*(parseFloat(item.unit_price)||0)).toFixed(2)}
               </span>
-              <button style={s.removeBtn} onClick={() => removeItem(idx)}>✕</button>
+              <button style={s.rmBtn} onClick={() => setItems(p => p.filter((_,j) => j !== i))}>✕</button>
             </div>
           ))}
-          <button style={s.addItemBtn} onClick={addItem}>+ Add line item</button>
+          <button style={s.addItem} onClick={() => setItems(p => [...p, { description:'',quantity:1,unit_price:0 }])}>+ Add line item</button>
 
-          {/* Totals */}
+          {/* Totals + VAT toggle */}
           <div style={s.totals}>
-            <div style={s.totalRow}><span>Subtotal</span><span>£{subtotal.toFixed(2)}</span></div>
-            <div style={s.totalRow}><span>VAT ({VAT_RATE}%)</span><span>£{vatAmount.toFixed(2)}</span></div>
-            <div style={{ ...s.totalRow, fontWeight: 700, fontSize: 16, borderTop: '2px solid #E5E7EB', paddingTop: 10, marginTop: 4 }}>
-              <span>Total</span><span>£{total.toFixed(2)}</span>
+            <div style={s.totRow}><span>Subtotal</span><span>£{subtotal.toFixed(2)}</span></div>
+            <div style={s.vatRow}>
+              <label style={s.vatLabel}>
+                <input type="checkbox" checked={vatEnabled} onChange={e => setVatEnabled(e.target.checked)} style={{ marginRight: 8 }} />
+                VAT (20%)
+              </label>
+              <span style={{ color: vatEnabled ? '#0F172A' : '#94A3B8' }}>£{vatAmt.toFixed(2)}</span>
             </div>
+            <div style={s.grandRow}><span>Total</span><span>£{total.toFixed(2)}</span></div>
           </div>
 
-          <label style={s.label}>Notes</label>
-          <textarea style={s.textarea} placeholder="Payment terms, notes for client..." value={notes} onChange={e => setNotes(e.target.value)} />
+          <L>Notes</L>
+          <textarea style={s.ta} rows={3} placeholder="Payment terms, additional notes…" value={notes} onChange={e => setNotes(e.target.value)} />
         </div>
 
         <div style={s.footer}>
-          {isEdit && <button style={s.deleteBtn} onClick={handleDelete}>Delete</button>}
+          {isEdit && <button style={s.delBtn} onClick={del}>Delete</button>}
           <div style={{ display: 'flex', gap: 8, marginLeft: 'auto' }}>
             <button style={s.cancelBtn} onClick={onClose}>Cancel</button>
-            <button style={s.saveBtn} onClick={handleSave} disabled={saving}>{saving ? 'Saving...' : isEdit ? 'Save changes' : 'Create'}</button>
+            <button style={s.saveBtn} onClick={save} disabled={saving}>{saving ? 'Saving…' : isEdit ? 'Save changes' : 'Create'}</button>
           </div>
         </div>
       </div>
@@ -230,32 +212,36 @@ export default function QuoteModal({ quote, clients, userId, userEmail, onClose,
   );
 }
 
+function Row({ children }: any) { return <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>{children}</div>; }
+function Col({ children }: any) { return <div style={{ flex: 1 }}>{children}</div>; }
+function L({ children, style: st }: any) { return <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6, marginTop: 12, textTransform: 'uppercase', letterSpacing: '0.06em', ...st }}>{children}</label>; }
+
 const s: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
-  modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 24px', borderBottom: '1px solid #F3F4F6' },
-  modalTitle: { fontSize: 17, fontWeight: 700, color: '#0F172A', margin: 0 },
-  closeBtn: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#94A3B8' },
-  body: { padding: '20px 24px', overflowY: 'auto', flex: 1 },
-  footer: { padding: '14px 24px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center' },
-  error: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 8, marginBottom: 14, fontSize: 13 },
-  actions: { display: 'flex', gap: 8, marginBottom: 16 },
-  actionBtn: { padding: '8px 14px', borderRadius: 8, border: '1px solid #BFDBFE', background: '#EFF6FF', color: '#2563EB', fontSize: 13, cursor: 'pointer', fontWeight: 500 },
-  row: { display: 'flex', gap: 12, marginBottom: 4 },
-  col: { flex: 1 },
-  label: { display: 'block', fontSize: 12, fontWeight: 500, color: '#1E293B', marginBottom: 5, marginTop: 12 },
-  input: { width: '100%', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, color: '#0F172A', background: '#F8FAFC', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, color: '#0F172A', background: '#F8FAFC', boxSizing: 'border-box', minHeight: 70, resize: 'vertical' },
-  toggle: { display: 'flex', border: '1px solid #D1D5DB', borderRadius: 8, overflow: 'hidden' },
-  toggleBtn: { flex: 1, padding: '9px', border: 'none', background: '#F8FAFC', cursor: 'pointer', fontSize: 13, color: '#64748B' },
-  toggleActive: { background: '#2563EB', color: '#fff', fontWeight: 600 },
-  itemsHeader: { display: 'flex', gap: 8, padding: '6px 0', fontSize: 11, fontWeight: 600, color: '#94A3B8', marginBottom: 4 },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
+  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 660, maxHeight: '94vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.22)' },
+  hdr: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #F1F5F9' },
+  htitle: { fontSize: 17, fontWeight: 800, color: '#0F172A' },
+  x: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#94A3B8' },
+  body: { padding: '16px 24px', overflowY: 'auto', flex: 1 },
+  footer: { padding: '14px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center' },
+  err: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 10, marginBottom: 12, fontSize: 13, fontWeight: 600 },
+  toggle: { display: 'flex', border: '1.5px solid #E2E8F0', borderRadius: 10, overflow: 'hidden' },
+  tBtn: { flex: 1, padding: '10px', border: 'none', background: '#F8FAFC', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#64748B', fontFamily: 'inherit' },
+  tActive: { background: '#0F172A', color: '#fff' },
+  inp: { width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', boxSizing: 'border-box' },
+  ta: { width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
+  quickAdd: { display: 'flex', gap: 8, marginTop: 8, marginBottom: 4 },
+  quickAddBtn: { padding: '10px 16px', background: '#EFF6FF', color: '#2563EB', border: '1.5px solid #BFDBFE', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' },
+  itemsHdr: { display: 'flex', gap: 8, fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' },
   itemRow: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 },
-  removeBtn: { width: 28, height: 28, border: 'none', background: '#FEF2F2', color: '#DC2626', borderRadius: 6, cursor: 'pointer', fontSize: 11, flexShrink: 0 },
-  addItemBtn: { background: 'none', border: '1px dashed #D1D5DB', borderRadius: 8, padding: '8px', width: '100%', color: '#64748B', fontSize: 13, cursor: 'pointer', marginTop: 4 },
-  totals: { background: '#F8FAFC', borderRadius: 10, padding: '14px 16px', marginTop: 16, marginBottom: 8 },
-  totalRow: { display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#1E293B', marginBottom: 6 },
-  saveBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  cancelBtn: { background: '#fff', color: '#1E293B', border: '1px solid #D1D5DB', borderRadius: 8, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
-  deleteBtn: { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
+  rmBtn: { width: 28, height: 28, border: 'none', background: '#FEF2F2', color: '#EF4444', borderRadius: 6, cursor: 'pointer', fontSize: 11, flexShrink: 0 },
+  addItem: { width: '100%', padding: '9px', border: '1.5px dashed #E2E8F0', borderRadius: 10, background: 'none', color: '#94A3B8', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 4, fontFamily: 'inherit' },
+  totals: { background: '#F8FAFC', borderRadius: 12, padding: '14px 16px', marginTop: 16, marginBottom: 8 },
+  totRow: { display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748B', marginBottom: 8 },
+  vatRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, marginBottom: 8 },
+  vatLabel: { display: 'flex', alignItems: 'center', color: '#475569', fontWeight: 500, cursor: 'pointer' },
+  grandRow: { display: 'flex', justifyContent: 'space-between', fontSize: 17, fontWeight: 800, color: '#0F172A', borderTop: '2px solid #E2E8F0', paddingTop: 10, marginTop: 4 },
+  saveBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' },
+  cancelBtn: { background: '#fff', color: '#475569', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 18px', fontSize: 14, cursor: 'pointer' },
+  delBtn: { background: '#FEF2F2', color: '#EF4444', border: '1.5px solid #FEE2E2', borderRadius: 10, padding: '11px 18px', fontSize: 14, cursor: 'pointer' },
 };
