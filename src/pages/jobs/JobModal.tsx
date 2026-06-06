@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
-import { Job, Client, JobStatus, STATUS_LABELS } from './JobsPage';
+import { STATUS_LABELS } from './JobsPage';
 
 interface Props {
   job: Job | null;
