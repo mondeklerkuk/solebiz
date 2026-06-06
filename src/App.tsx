@@ -4,6 +4,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import JobsPage from './pages/jobs/JobsPage';
+import QuotesPage from './pages/quotes/QuotesPage';
 
 type Page = 'dashboard' | 'jobs' | 'quotes' | 'finance' | 'settings';
 
@@ -33,7 +34,7 @@ function AppRoutes() {
 
   const renderPage = () => {
     if (page === 'jobs') return <JobsPage />;
-    if (page === 'quotes') return <ComingSoon label="Quotes & Invoices" />;
+    if (page === 'quotes') return <QuotesPage />;
     if (page === 'finance') return <ComingSoon label="Finance" />;
     if (page === 'settings') return <ComingSoon label="Settings" />;
     return <Dashboard onNavigate={setPage} />;
