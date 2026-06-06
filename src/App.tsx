@@ -8,13 +8,50 @@ import QuotesPage from './pages/quotes/QuotesPage';
 
 type Page = 'dashboard' | 'jobs' | 'quotes' | 'finance' | 'settings';
 
-const NAV: { id: Page; label: string; icon: string }[] = [
-  { id: 'dashboard', label: 'Home', icon: '⊞' },
-  { id: 'jobs', label: 'Jobs', icon: '🔨' },
-  { id: 'quotes', label: 'Quotes', icon: '📋' },
-  { id: 'finance', label: 'Finance', icon: '💰' },
-  { id: 'settings', label: 'Settings', icon: '⚙️' },
+const NAV = [
+  { id: 'dashboard' as Page, label: 'Overview', icon: '▤' },
+  { id: 'jobs' as Page, label: 'Jobs', icon: '🔨' },
+  { id: 'quotes' as Page, label: 'Quotes', icon: '📋' },
+  { id: 'finance' as Page, label: 'Finance', icon: '💰' },
+  { id: 'settings' as Page, label: 'Settings', icon: '⚙' },
 ];
+
+function Sidebar({ page, setPage, user, signOut }: any) {
+  const initials = (user?.email || 'U').charAt(0).toUpperCase();
+  const biz = user?.user_metadata?.business_name || 'My Business';
+  return (
+    <aside style={s.sidebar}>
+      <div style={s.sidebarInner}>
+        <div style={s.logoRow}>
+          <div style={s.logoIcon}>S</div>
+          <span style={s.logoText}>SoleBiz</span>
+        </div>
+        <nav style={s.nav}>
+          {NAV.map(n => {
+            const active = page === n.id;
+            return (
+              <button key={n.id} style={{ ...s.navBtn, ...(active ? s.navActive : {}) }} onClick={() => setPage(n.id)}>
+                <span style={s.navIcon}>{n.icon}</span>
+                <span>{n.label}</span>
+                {active && <div style={s.navPill} />}
+              </button>
+            );
+          })}
+        </nav>
+      </div>
+      <div style={s.sidebarFoot}>
+        <div style={s.userCard}>
+          <div style={s.avatar}>{initials}</div>
+          <div style={{ flex: 1, overflow: 'hidden' }}>
+            <div style={s.userName}>{biz}</div>
+            <div style={s.userEmail}>{user?.email}</div>
+          </div>
+        </div>
+        <button style={s.signOut} onClick={signOut}>Sign out</button>
+      </div>
+    </aside>
+  );
+}
 
 function AppRoutes() {
   const { session, loading, signOut, user } = useAuth();
@@ -22,8 +59,8 @@ function AppRoutes() {
   const [page, setPage] = useState<Page>('dashboard');
 
   if (loading) return (
-    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F2F2F7' }}>
-      <div style={{ fontSize: 28, fontWeight: 700, color: '#007AFF', letterSpacing: '-0.5px' }}>SoleBiz</div>
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
+      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 22, fontWeight: 800, color: '#2563EB', letterSpacing: '-1px' }}>SoleBiz</span>
     </div>
   );
 
@@ -35,91 +72,62 @@ function AppRoutes() {
   const renderPage = () => {
     if (page === 'jobs') return <JobsPage />;
     if (page === 'quotes') return <QuotesPage />;
-    if (page === 'finance') return <ComingSoon label="Finance" icon="💰" />;
-    if (page === 'settings') return <ComingSoon label="Settings" icon="⚙️" />;
+    if (page === 'finance') return <Soon label="Finance" icon="💰" />;
+    if (page === 'settings') return <Soon label="Settings" icon="⚙" />;
     return <Dashboard onNavigate={setPage} />;
   };
 
-  const initials = (user?.email || 'U').charAt(0).toUpperCase();
-
   return (
-    <div style={{ display: 'flex', minHeight: '100vh', background: '#F2F2F7' }}>
-      {/* Sidebar */}
-      <div style={s.sidebar}>
-        <div style={s.sidebarTop}>
-          <div style={s.logo}>SoleBiz</div>
-          <nav style={s.nav}>
-            {NAV.map(n => (
-              <button key={n.id} style={{ ...s.navItem, ...(page === n.id ? s.navActive : {}) }} onClick={() => setPage(n.id)}>
-                <span style={s.navIcon}>{n.icon}</span>
-                <span style={s.navLabel}>{n.label}</span>
-              </button>
-            ))}
-          </nav>
-        </div>
-        <div style={s.sidebarBottom}>
-          <div style={s.userRow}>
-            <div style={s.avatar}>{initials}</div>
-            <div style={s.userInfo}>
-              <div style={s.userName}>{user?.user_metadata?.business_name || 'My Business'}</div>
-              <div style={s.userEmail}>{user?.email}</div>
-            </div>
-          </div>
-          <button style={s.signOutBtn} onClick={signOut}>Sign out</button>
-        </div>
-      </div>
-
-      {/* Main */}
-      <div style={s.main}>{renderPage()}</div>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC' }}>
+      <Sidebar page={page} setPage={setPage} user={user} signOut={signOut} />
+      <main style={s.main}>{renderPage()}</main>
     </div>
   );
 }
 
-function ComingSoon({ label, icon }: { label: string; icon: string }) {
+function Soon({ label, icon }: { label: string; icon: string }) {
   return (
-    <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 400 }}>
-      <div style={{ fontSize: 48, marginBottom: 16 }}>{icon}</div>
-      <h2 style={{ fontSize: 22, fontWeight: 700, color: '#1C1C1E', marginBottom: 8 }}>{label}</h2>
-      <p style={{ color: '#8E8E93', fontSize: 15 }}>Coming soon</p>
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 500, gap: 12 }}>
+      <span style={{ fontSize: 44 }}>{icon}</span>
+      <h2 style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.5px' }}>{label}</h2>
+      <p style={{ color: '#94A3B8', fontSize: 15 }}>Coming soon</p>
     </div>
   );
 }
 
 const s: Record<string, React.CSSProperties> = {
   sidebar: {
-    width: 240,
-    background: 'rgba(255,255,255,0.85)',
-    backdropFilter: 'blur(20px)',
-    WebkitBackdropFilter: 'blur(20px)',
-    borderRight: '1px solid rgba(0,0,0,0.06)',
+    width: 232,
+    background: '#0F172A',
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    padding: '24px 12px',
     position: 'sticky',
     top: 0,
     height: '100vh',
+    flexShrink: 0,
   },
-  sidebarTop: { display: 'flex', flexDirection: 'column', gap: 8 },
-  logo: { fontSize: 22, fontWeight: 700, color: '#007AFF', padding: '4px 12px', marginBottom: 16, letterSpacing: '-0.5px' },
+  sidebarInner: { padding: '28px 16px 0' },
+  logoRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36, padding: '0 8px' },
+  logoIcon: { width: 32, height: 32, borderRadius: 8, background: '#2563EB', color: '#fff', fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  logoText: { fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' },
   nav: { display: 'flex', flexDirection: 'column', gap: 2 },
-  navItem: {
-    display: 'flex', alignItems: 'center', gap: 10,
+  navBtn: {
+    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
     padding: '10px 12px', borderRadius: 10, border: 'none',
-    background: 'none', cursor: 'pointer', fontSize: 14,
-    color: '#3C3C43', textAlign: 'left', width: '100%',
-    transition: 'background 0.15s',
+    background: 'none', color: '#94A3B8', fontSize: 14, fontWeight: 500,
+    cursor: 'pointer', position: 'relative', textAlign: 'left',
+    transition: 'color 0.15s, background 0.15s',
   },
-  navActive: { background: '#007AFF15', color: '#007AFF', fontWeight: 600 },
-  navIcon: { fontSize: 16, width: 20, textAlign: 'center' },
-  navLabel: { fontSize: 14 },
-  sidebarBottom: { display: 'flex', flexDirection: 'column', gap: 12 },
-  userRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: '#F2F2F7', borderRadius: 12 },
-  avatar: { width: 34, height: 34, borderRadius: 17, background: '#007AFF', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, fontWeight: 700, flexShrink: 0 },
-  userInfo: { flex: 1, overflow: 'hidden' },
-  userName: { fontSize: 13, fontWeight: 600, color: '#1C1C1E', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  userEmail: { fontSize: 11, color: '#8E8E93', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  signOutBtn: { background: 'none', border: 'none', color: '#8E8E93', fontSize: 13, cursor: 'pointer', padding: '4px 12px', textAlign: 'left' },
+  navActive: { background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600 },
+  navIcon: { fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0 },
+  navPill: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, background: '#2563EB' },
+  sidebarFoot: { padding: '16px' },
+  userCard: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px', background: 'rgba(255,255,255,0.06)', borderRadius: 12, marginBottom: 8 },
+  avatar: { width: 32, height: 32, borderRadius: 8, background: '#2563EB', color: '#fff', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  userName: { fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  userEmail: { fontSize: 11, color: '#64748B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 },
+  signOut: { width: '100%', padding: '8px', background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#64748B', fontSize: 13, fontWeight: 500, cursor: 'pointer' },
   main: { flex: 1, overflowY: 'auto', minHeight: '100vh' },
 };
 
