@@ -24,10 +24,14 @@ export function AuthProvider({ children }: { children: any }) {
     return () => listener.subscription.unsubscribe();
   }, []);
 
+  // Called after updateUser to pull fresh metadata into state
   async function refreshUser() {
     const { data } = await supabase.auth.getUser();
     if (data?.user) {
-      setSession((prev: any) => prev ? { ...prev, user: data.user } : prev);
+      setSession((prev: any) => ({
+        ...prev,
+        user: data.user,
+      }));
     }
   }
 

@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 export default function Settings() {
   const { user, refreshUser } = useAuth() as any;
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<'idle'|'saving'|'saved'|'error'>('idle');
   const [logo, setLogo] = useState('');
   const [form, setForm] = useState({
     business_name: '', email: '', phone: '', address: '',
@@ -35,52 +35,107 @@ export default function Settings() {
       invoice_notes: m.invoice_notes || 'Thank you for your business.',
     });
     if (m.logo) setLogo(m.logo);
-  }, [user]);
+  }, [user?.id]); // only re-run when user ID changes, not on every re-render
 
   const set = (k: string) => (e: any) => setForm(f => ({ ...f, [k]: e.target.value }));
 
   function handleLogo(e: any) {
     const file = e.target.files?.[0];
     if (!file) return;
+    // Compress if too large
     const r = new FileReader();
-    r.onload = ev => setLogo(ev.target?.result as string);
+    r.onload = ev => {
+      const result = ev.target?.result as string;
+      // If > 500kb, compress via canvas
+      if (result.length > 500000) {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const max = 300;
+          let w = img.width, h = img.height;
+          if (w > max) { h = (h * max) / w; w = max; }
+          canvas.width = w; canvas.height = h;
+          canvas.getContext('2d')!.drawImage(img, 0, 0, w, h);
+          setLogo(canvas.toDataURL('image/jpeg', 0.8));
+        };
+        img.src = result;
+      } else {
+        setLogo(result);
+      }
+    };
     r.readAsDataURL(file);
   }
 
   async function save() {
+    setSaveStatus('saving');
     setSaving(true);
-    await supabase.auth.updateUser({ data: { ...form, logo } });
-    // Refresh the user in context so dashboard updates immediately
-    await refreshUser();
-    setSaving(false); setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: { ...form, logo }
+      });
+      if (error) throw error;
+      // Pull fresh user data into context so dashboard/sidebar update instantly
+      await refreshUser();
+      setSaveStatus('saved');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    } catch (err) {
+      console.error('Save error:', err);
+      setSaveStatus('error');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+    }
+    setSaving(false);
   }
+
+  const btnLabel = { idle: 'Save settings', saving: 'Saving…', saved: '✓ Saved!', error: '✗ Error — try again' }[saveStatus];
+  const btnColor = { idle: '#2563EB', saving: '#2563EB', saved: '#10B981', error: '#EF4444' }[saveStatus];
 
   return (
     <div style={s.page}>
       <div style={s.header}>
-        <h1 style={s.title}>Settings</h1>
-        <p style={s.sub}>Your business profile — used on all quotes & invoices</p>
+        <div>
+          <h1 style={s.title}>Settings</h1>
+          <p style={s.sub}>Your business profile — used on all quotes & invoices</p>
+        </div>
+        {saveStatus !== 'idle' && (
+          <div style={{ ...s.statusBanner, background: btnColor }}>
+            {btnLabel}
+          </div>
+        )}
       </div>
 
       <div style={s.grid}>
         <section style={s.card}>
           <h2 style={s.cardTitle}>Business Identity</h2>
+
+          {/* Logo upload */}
           <div style={s.logoRow}>
             <div style={s.logoBig} onClick={() => fileRef.current?.click()}>
               {logo
-                ? <img src={logo} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }} />
-                : <><span style={{ fontSize: 30 }}>🏢</span><span style={s.logoHint}>Click to upload</span></>
+                ? <img src={logo} alt="logo" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }} />
+                : (
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: 28, marginBottom: 4 }}>🏢</div>
+                    <div style={s.logoHint}>Click to upload</div>
+                  </div>
+                )
               }
             </div>
-            <div>
+            <div style={{ flex: 1 }}>
               <p style={s.logoLabel}>Business Logo</p>
-              <p style={s.logoSub}>PNG or JPG · shown on quotes & invoices</p>
-              <button style={s.outBtn} onClick={() => fileRef.current?.click()}>Upload logo</button>
-              {logo && <button style={s.dangerBtn} onClick={() => setLogo('')}>Remove</button>}
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogo} />
+              <p style={s.logoSub}>PNG or JPG · appears on quotes & invoices</p>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button style={s.outBtn} onClick={() => fileRef.current?.click()}>
+                  {logo ? '🔄 Change logo' : '⬆ Upload logo'}
+                </button>
+                {logo && (
+                  <button style={s.dangerBtn} onClick={() => setLogo('')}>Remove</button>
+                )}
+              </div>
+              {logo && <p style={{ fontSize: 11, color: '#10B981', marginTop: 8, fontWeight: 600 }}>✓ Logo ready</p>}
             </div>
           </div>
+          <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogo} />
+
           <F label="Business name *" v={form.business_name} on={set('business_name')} ph="Acme Plumbing Ltd" />
           <F label="Email" v={form.email} on={set('email')} ph="hello@yourbusiness.com" />
           <F label="Phone" v={form.phone} on={set('phone')} ph="+44 7700 900000" />
@@ -98,7 +153,7 @@ export default function Settings() {
 
         <section style={s.card}>
           <h2 style={s.cardTitle}>Bank Details</h2>
-          <p style={s.cardSub}>Displayed on invoices to help clients pay you</p>
+          <p style={s.cardSub}>Shown on invoices so clients can pay you</p>
           <F label="Bank name" v={form.bank_name} on={set('bank_name')} ph="Barclays" />
           <F label="Account number" v={form.account_number} on={set('account_number')} ph="12345678" />
           <F label="Sort code" v={form.sort_code} on={set('sort_code')} ph="12-34-56" />
@@ -115,8 +170,13 @@ export default function Settings() {
       </div>
 
       <div style={s.saveRow}>
-        <button style={{ ...s.saveBtn, background: saved ? '#10B981' : '#2563EB', opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>
-          {saved ? '✓ Saved! Dashboard updated.' : saving ? 'Saving…' : 'Save settings'}
+        <p style={s.saveHint}>Changes update the dashboard and all future documents instantly</p>
+        <button
+          style={{ ...s.saveBtn, background: btnColor, opacity: saving ? 0.8 : 1 }}
+          onClick={save}
+          disabled={saving}
+        >
+          {btnLabel}
         </button>
       </div>
     </div>
@@ -134,24 +194,26 @@ function F({ label, v, on, ph }: any) {
 
 const s: Record<string, React.CSSProperties> = {
   page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
-  header: { marginBottom: 28 },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 },
   title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
   sub: { fontSize: 14, color: '#94A3B8', fontWeight: 500, marginTop: 4 },
+  statusBanner: { color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, transition: 'background 0.3s' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginBottom: 24 },
   card: { background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
   cardTitle: { fontSize: 15, fontWeight: 800, color: '#0F172A', marginBottom: 20, letterSpacing: '-0.3px' },
   cardSub: { fontSize: 13, color: '#94A3B8', marginTop: -14, marginBottom: 18 },
   divider: { height: 1, background: '#F1F5F9', margin: '18px 0' },
   logoRow: { display: 'flex', gap: 16, alignItems: 'flex-start', marginBottom: 20 },
-  logoBig: { width: 88, height: 88, borderRadius: 14, border: '2px dashed #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 4, flexShrink: 0, overflow: 'hidden' },
-  logoHint: { fontSize: 10, color: '#94A3B8', fontWeight: 600, textAlign: 'center' },
+  logoBig: { width: 96, height: 96, borderRadius: 14, border: '2px dashed #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
+  logoHint: { fontSize: 10, color: '#94A3B8', fontWeight: 600 },
   logoLabel: { fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 4 },
   logoSub: { fontSize: 12, color: '#94A3B8', marginBottom: 10 },
-  outBtn: { padding: '7px 14px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: '#fff', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer', marginRight: 8, fontFamily: 'inherit' },
-  dangerBtn: { padding: '7px 14px', border: '1.5px solid #FEE2E2', borderRadius: 8, background: '#FEF2F2', fontSize: 13, fontWeight: 600, color: '#EF4444', cursor: 'pointer', fontFamily: 'inherit' },
+  outBtn: { padding: '8px 14px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: '#fff', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer', fontFamily: 'inherit' },
+  dangerBtn: { padding: '8px 14px', border: '1.5px solid #FEE2E2', borderRadius: 8, background: '#FEF2F2', fontSize: 13, fontWeight: 600, color: '#EF4444', cursor: 'pointer', fontFamily: 'inherit' },
   lbl: { display: 'block', fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
   inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', fontWeight: 500, boxSizing: 'border-box' },
   ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
-  saveRow: { display: 'flex', justifyContent: 'flex-end' },
-  saveBtn: { color: '#fff', border: 'none', borderRadius: 12, padding: '13px 36px', fontSize: 15, fontWeight: 700, cursor: 'pointer', transition: 'background 0.3s', fontFamily: 'inherit' },
+  saveRow: { display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 },
+  saveHint: { fontSize: 13, color: '#94A3B8', fontStyle: 'italic' },
+  saveBtn: { color: '#fff', border: 'none', borderRadius: 12, padding: '13px 36px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.3s' },
 };
