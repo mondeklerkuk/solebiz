@@ -106,7 +106,7 @@ export default function JobModal({ job, clients, userId, onClose, onSaved }: Pro
           ) : (
             <div style={s.newClientBox}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 13, fontWeight: 600, color: '#374151' }}>New client</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#3C3C43' }}>New client</span>
                 <button style={s.linkBtn} onClick={() => setShowNewClient(false)}>Use existing</button>
               </div>
               <input style={{ ...s.input, marginBottom: 8 }} placeholder="Client name *" value={newClientName} onChange={e => setNewClientName(e.target.value)} />
@@ -136,20 +136,20 @@ export default function JobModal({ job, clients, userId, onClose, onSaved }: Pro
 
 const s: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: '#fff', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
+  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 520, maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #F3F4F6' },
-  modalTitle: { fontSize: 18, fontWeight: 700, color: '#111827', margin: 0 },
-  closeBtn: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#9CA3AF', padding: 4 },
+  modalTitle: { fontSize: 18, fontWeight: 700, color: '#1C1C1E', margin: 0 },
+  closeBtn: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#8E8E93', padding: 4 },
   body: { padding: '20px 24px', overflowY: 'auto', flex: 1 },
   footer: { padding: '16px 24px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center' },
-  error: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 8, marginBottom: 16, fontSize: 14 },
-  label: { display: 'block', fontSize: 13, fontWeight: 500, color: '#374151', marginBottom: 6, marginTop: 14 },
-  input: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, color: '#111827', background: '#F9FAFB', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, color: '#111827', background: '#F9FAFB', boxSizing: 'border-box', minHeight: 80, resize: 'vertical' },
-  newClientBox: { background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: 8, padding: 12 },
-  saveBtn: { background: '#1A56DB', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  cancelBtn: { background: '#fff', color: '#374151', border: '1px solid #D1D5DB', borderRadius: 8, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
-  deleteBtn: { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
-  secondaryBtn: { background: '#fff', color: '#1A56DB', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' },
-  linkBtn: { background: 'none', border: 'none', color: '#1A56DB', fontSize: 12, cursor: 'pointer', padding: 0 },
+  error: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 10, marginBottom: 16, fontSize: 14 },
+  label: { display: 'block', fontSize: 13, fontWeight: 500, color: '#3C3C43', marginBottom: 6, marginTop: 14 },
+  input: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 10, fontSize: 14, color: '#1C1C1E', background: '#F2F2F7', boxSizing: 'border-box' },
+  textarea: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 10, fontSize: 14, color: '#1C1C1E', background: '#F2F2F7', boxSizing: 'border-box', minHeight: 80, resize: 'vertical' },
+  newClientBox: { background: '#F2F2F7', border: '1px solid #E5E7EB', borderRadius: 10, padding: 12 },
+  saveBtn: { background: '#007AFF', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  cancelBtn: { background: '#fff', color: '#3C3C43', border: '1px solid #D1D5DB', borderRadius: 10, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
+  deleteBtn: { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 10, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
+  secondaryBtn: { background: '#fff', color: '#007AFF', border: '1px solid #BFDBFE', borderRadius: 10, padding: '10px 14px', fontSize: 13, cursor: 'pointer', whiteSpace: 'nowrap' },
+  linkBtn: { background: 'none', border: 'none', color: '#007AFF', fontSize: 12, cursor: 'pointer', padding: 0 },
 };

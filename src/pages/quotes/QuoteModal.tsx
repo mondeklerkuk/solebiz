@@ -154,7 +154,7 @@ export default function QuoteModal({ quote, clients, userId, onClose, onSaved }:
               <input style={{ ...s.input, flex: 3 }} placeholder="Description" value={item.description} onChange={e => updateItem(idx, 'description', e.target.value)} />
               <input style={{ ...s.input, width: 60, textAlign: 'center' }} type="number" min="1" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} />
               <input style={{ ...s.input, width: 80, textAlign: 'right' }} type="number" min="0" step="0.01" value={item.unit_price} onChange={e => updateItem(idx, 'unit_price', e.target.value)} />
-              <span style={{ width: 90, textAlign: 'right', fontSize: 14, color: '#374151', lineHeight: '38px' }}>£{((parseFloat(item.quantity)||0)*(parseFloat(item.unit_price)||0)).toFixed(2)}</span>
+              <span style={{ width: 90, textAlign: 'right', fontSize: 14, color: '#3C3C43', lineHeight: '38px' }}>£{((parseFloat(item.quantity)||0)*(parseFloat(item.unit_price)||0)).toFixed(2)}</span>
               <button style={s.removeBtn} onClick={() => setItems(prev => prev.filter((_,i) => i !== idx))}>✕</button>
             </div>
           ))}
@@ -181,30 +181,30 @@ export default function QuoteModal({ quote, clients, userId, onClose, onSaved }:
 
 const s: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: '#fff', borderRadius: 16, width: '100%', maxWidth: 640, maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
+  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 640, maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 24px', borderBottom: '1px solid #F3F4F6' },
-  modalTitle: { fontSize: 17, fontWeight: 700, color: '#111827', margin: 0 },
-  closeBtn: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#9CA3AF' },
+  modalTitle: { fontSize: 17, fontWeight: 700, color: '#1C1C1E', margin: 0 },
+  closeBtn: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#8E8E93' },
   body: { padding: '20px 24px', overflowY: 'auto', flex: 1 },
   footer: { padding: '14px 24px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center' },
-  error: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 8, marginBottom: 14, fontSize: 13 },
+  error: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 10, marginBottom: 14, fontSize: 13 },
   actions: { display: 'flex', gap: 8, marginBottom: 16 },
-  actionBtn: { padding: '8px 14px', borderRadius: 8, border: '1px solid #BFDBFE', background: '#EFF6FF', color: '#1D4ED8', fontSize: 13, cursor: 'pointer', fontWeight: 500 },
+  actionBtn: { padding: '8px 14px', borderRadius: 10, border: '1px solid #BFDBFE', background: '#EFF6FF', color: '#1D4ED8', fontSize: 13, cursor: 'pointer', fontWeight: 500 },
   row: { display: 'flex', gap: 12, marginBottom: 4 },
   col: { flex: 1 },
-  label: { display: 'block', fontSize: 12, fontWeight: 500, color: '#374151', marginBottom: 5, marginTop: 12 },
-  input: { width: '100%', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, color: '#111827', background: '#F9FAFB', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 14, color: '#111827', background: '#F9FAFB', boxSizing: 'border-box', minHeight: 70, resize: 'vertical' },
-  toggle: { display: 'flex', border: '1px solid #D1D5DB', borderRadius: 8, overflow: 'hidden' },
-  toggleBtn: { flex: 1, padding: '9px', border: 'none', background: '#F9FAFB', cursor: 'pointer', fontSize: 13, color: '#6B7280' },
-  toggleActive: { background: '#1A56DB', color: '#fff', fontWeight: 600 },
-  itemsHeader: { display: 'flex', gap: 8, padding: '6px 0', fontSize: 11, fontWeight: 600, color: '#9CA3AF', marginBottom: 4 },
+  label: { display: 'block', fontSize: 12, fontWeight: 500, color: '#3C3C43', marginBottom: 5, marginTop: 12 },
+  input: { width: '100%', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: 10, fontSize: 14, color: '#1C1C1E', background: '#F2F2F7', boxSizing: 'border-box' },
+  textarea: { width: '100%', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: 10, fontSize: 14, color: '#1C1C1E', background: '#F2F2F7', boxSizing: 'border-box', minHeight: 70, resize: 'vertical' },
+  toggle: { display: 'flex', border: '1px solid #D1D5DB', borderRadius: 10, overflow: 'hidden' },
+  toggleBtn: { flex: 1, padding: '9px', border: 'none', background: '#F2F2F7', cursor: 'pointer', fontSize: 13, color: '#8E8E93' },
+  toggleActive: { background: '#007AFF', color: '#fff', fontWeight: 600 },
+  itemsHeader: { display: 'flex', gap: 8, padding: '6px 0', fontSize: 11, fontWeight: 600, color: '#8E8E93', marginBottom: 4 },
   itemRow: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 },
   removeBtn: { width: 28, height: 28, border: 'none', background: '#FEF2F2', color: '#DC2626', borderRadius: 6, cursor: 'pointer', fontSize: 11, flexShrink: 0 },
-  addItemBtn: { background: 'none', border: '1px dashed #D1D5DB', borderRadius: 8, padding: '8px', width: '100%', color: '#6B7280', fontSize: 13, cursor: 'pointer', marginTop: 4 },
-  totals: { background: '#F9FAFB', borderRadius: 10, padding: '14px 16px', marginTop: 16, marginBottom: 8 },
-  totalRow: { display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#374151', marginBottom: 6 },
-  saveBtn: { background: '#1A56DB', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  cancelBtn: { background: '#fff', color: '#374151', border: '1px solid #D1D5DB', borderRadius: 8, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
-  deleteBtn: { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
+  addItemBtn: { background: 'none', border: '1px dashed #D1D5DB', borderRadius: 10, padding: '8px', width: '100%', color: '#8E8E93', fontSize: 13, cursor: 'pointer', marginTop: 4 },
+  totals: { background: '#F2F2F7', borderRadius: 12, padding: '14px 16px', marginTop: 16, marginBottom: 8 },
+  totalRow: { display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#3C3C43', marginBottom: 6 },
+  saveBtn: { background: '#007AFF', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
+  cancelBtn: { background: '#fff', color: '#3C3C43', border: '1px solid #D1D5DB', borderRadius: 10, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
+  deleteBtn: { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 10, padding: '10px 16px', fontSize: 14, cursor: 'pointer' },
 };
