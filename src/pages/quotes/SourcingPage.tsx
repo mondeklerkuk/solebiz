@@ -60,7 +60,7 @@ export default function SourcingPage() {
     } catch (err: any) {
       console.error('Sourcing error:', err);
       if (err.message?.includes('401') || err.message?.includes('api-key') || err.message?.includes('403')) {
-        setError('API authentication error. Please check configuration.');
+        setError('Sourcing requires an Anthropic API key. Add ANTHROPIC_API_KEY in your Vercel environment variables to activate this feature.');
       } else if (err.message?.includes('Failed to fetch') || err.message?.includes('NetworkError')) {
         setError('Network error — please check your connection and try again.');
       } else {
