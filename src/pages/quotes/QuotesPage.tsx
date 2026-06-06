@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/AuthContext';
 import QuoteModal from './QuoteModal';
+import DocumentViewer from './DocumentViewer';
 
 export const QUOTE_STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   draft:    { bg: '#F8FAFC', text: '#1E293B', border: '#E2E8F0' },
   sent:     { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
-  viewed:   { bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA' },
-  accepted: { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
+  viewed:   { bg: '#FFF7ED', text: '#D97706', border: '#FED7AA' },
+  accepted: { bg: '#F0FDF4', text: '#059669', border: '#BBF7D0' },
   declined: { bg: '#FEF2F2', text: '#DC2626', border: '#FECACA' },
   invoiced: { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
   paid:     { bg: '#ECFDF5', text: '#065F46', border: '#6EE7B7' },
@@ -25,6 +26,7 @@ export default function QuotesPage() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
+  const [viewingQuote, setViewingQuote] = useState<any>(null);
   const [filter, setFilter] = useState<'all' | 'quotes' | 'invoices'>('all');
 
   useEffect(() => { if (user) { fetchQuotes(); fetchClients(); } }, [user]);
@@ -33,7 +35,7 @@ export default function QuotesPage() {
     setLoading(true);
     const { data } = await supabase
       .from('quotes')
-      .select('*, client:clients(name, email, phone)')
+      .select('*, client:clients(id,name,email,phone,address)')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
     setQuotes(data || []);
@@ -53,6 +55,14 @@ export default function QuotesPage() {
 
   const totalValue = filtered.reduce((sum, q) => sum + (q.total || 0), 0);
   const paidValue = filtered.filter(q => q.status === 'paid').reduce((sum, q) => sum + (q.total || 0), 0);
+  const outstanding = totalValue - paidValue;
+
+  const userProfile = {
+    business_name: user?.user_metadata?.business_name || 'My Business',
+    email: user?.email,
+    phone: user?.user_metadata?.phone,
+    address: user?.user_metadata?.address,
+  };
 
   return (
     <div style={s.page}>
@@ -66,18 +76,16 @@ export default function QuotesPage() {
 
       {/* Stats */}
       <div style={s.statsRow}>
-        <div style={s.stat}>
-          <div style={s.statLabel}>Total Value</div>
-          <div style={s.statValue}>£{totalValue.toFixed(2)}</div>
-        </div>
-        <div style={s.stat}>
-          <div style={s.statLabel}>Paid</div>
-          <div style={{ ...s.statValue, color: '#15803D' }}>£{paidValue.toFixed(2)}</div>
-        </div>
-        <div style={s.stat}>
-          <div style={s.statLabel}>Outstanding</div>
-          <div style={{ ...s.statValue, color: '#C2410C' }}>£{(totalValue - paidValue).toFixed(2)}</div>
-        </div>
+        {[
+          { label: 'Total Value', value: `£${totalValue.toFixed(2)}`, color: '#0F172A' },
+          { label: 'Paid', value: `£${paidValue.toFixed(2)}`, color: '#059669' },
+          { label: 'Outstanding', value: `£${outstanding.toFixed(2)}`, color: outstanding > 0 ? '#D97706' : '#059669' },
+        ].map(st => (
+          <div key={st.label} style={s.stat}>
+            <div style={s.statLabel}>{st.label}</div>
+            <div style={{ ...s.statValue, color: st.color }}>{st.value}</div>
+          </div>
+        ))}
       </div>
 
       {/* Filters */}
@@ -89,45 +97,70 @@ export default function QuotesPage() {
         ))}
       </div>
 
-      {/* Table */}
       {loading ? (
-        <div style={s.loading}>Loading...</div>
+        <div style={s.loading}>Loading…</div>
       ) : filtered.length === 0 ? (
         <div style={s.empty}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📋</div>
-          <p>No documents yet. Create your first quote!</p>
+          <span style={{ fontSize: 40 }}>📋</span>
+          <p style={{ color: '#94A3B8', fontWeight: 500 }}>No documents yet. Create your first quote!</p>
         </div>
       ) : (
         <div style={s.table}>
+          {/* Header */}
           <div style={s.tableHeader}>
-            <span>Number</span><span>Client</span><span>Date</span><span>Total</span><span>Status</span><span></span>
+            <span style={{ flex: '0 0 120px' }}>Number</span>
+            <span style={{ flex: 1 }}>Client</span>
+            <span style={{ flex: '0 0 110px', display: window.innerWidth < 600 ? 'none' : 'block' }}>Date</span>
+            <span style={{ flex: '0 0 100px', textAlign: 'right' }}>Amount</span>
+            <span style={{ flex: '0 0 110px' }}>Status</span>
+            <span style={{ flex: '0 0 100px', textAlign: 'center' }}>Actions</span>
           </div>
           {filtered.map(q => {
-            const col = QUOTE_STATUS_COLORS[q.status];
+            const col = QUOTE_STATUS_COLORS[q.status] || QUOTE_STATUS_COLORS.draft;
             return (
               <div key={q.id} style={s.tableRow} onClick={() => { setEditingQuote(q); setModalOpen(true); }}>
-                <span style={s.quoteNum}>{q.quote_number}</span>
-                <span style={s.clientName}>{q.client?.name || '—'}</span>
-                <span style={s.date}>{new Date(q.issue_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
-                <span style={s.amount}>£{(q.total || 0).toFixed(2)}</span>
-                <span style={{ ...s.badge, background: col.bg, color: col.text, border: `1px solid ${col.border}` }}>
-                  {q.is_invoice ? '🧾 ' : '📋 '}{QUOTE_STATUS_LABELS[q.status]}
+                <span style={{ flex: '0 0 120px', fontSize: 13, fontWeight: 700, color: '#2563EB' }}>{q.quote_number}</span>
+                <span style={{ flex: 1, fontSize: 14, color: '#0F172A', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {q.client?.name || '—'}
                 </span>
-                <span style={s.arrow}>›</span>
+                <span style={{ flex: '0 0 110px', fontSize: 13, color: '#94A3B8', display: window.innerWidth < 600 ? 'none' : 'block' }}>
+                  {new Date(q.issue_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                </span>
+                <span style={{ flex: '0 0 100px', fontSize: 14, fontWeight: 700, color: '#0F172A', textAlign: 'right' }}>
+                  £{(q.total || 0).toFixed(2)}
+                </span>
+                <span style={{ flex: '0 0 110px' }}>
+                  <span style={{ ...s.badge, background: col.bg, color: col.text, border: `1px solid ${col.border}` }}>
+                    {q.is_invoice ? '🧾 ' : '📋 '}{QUOTE_STATUS_LABELS[q.status]}
+                  </span>
+                </span>
+                <div style={{ flex: '0 0 100px', display: 'flex', gap: 6, justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
+                  <button style={s.viewBtn} onClick={() => setViewingQuote(q)} title="Preview & Send">
+                    📤
+                  </button>
+                  <button style={s.editBtn} onClick={() => { setEditingQuote(q); setModalOpen(true); }} title="Edit">
+                    ✏️
+                  </button>
+                </div>
               </div>
             );
           })}
         </div>
       )}
 
+      {/* Edit modal */}
       {modalOpen && (
-        <QuoteModal
-          quote={editingQuote}
-          clients={clients}
-          userId={user.id}
-          userEmail={user.email || ''}
-          onClose={() => setModalOpen(false)}
-          onSaved={() => { setModalOpen(false); fetchQuotes(); }}
+        <QuoteModal quote={editingQuote} clients={clients} userId={user.id} userEmail={user.email || ''}
+          onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); fetchQuotes(); }} />
+      )}
+
+      {/* Document viewer + share */}
+      {viewingQuote && (
+        <DocumentViewer
+          quote={viewingQuote}
+          client={viewingQuote.client}
+          userProfile={userProfile}
+          onClose={() => { setViewingQuote(null); fetchQuotes(); }}
         />
       )}
     </div>
@@ -135,27 +168,24 @@ export default function QuotesPage() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 1000, margin: '0 auto' },
-  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
-  title: { fontSize: 24, fontWeight: 700, color: '#0F172A', margin: 0 },
-  subtitle: { fontSize: 14, color: '#64748B', margin: '4px 0 0' },
-  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  statsRow: { display: 'flex', flexWrap: 'wrap' as any, gap: 12, marginBottom: 20 },
-  stat: { flex: 1, background: '#fff', borderRadius: 12, padding: '16px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
-  statLabel: { fontSize: 12, color: '#64748B', marginBottom: 4 },
-  statValue: { fontSize: 22, fontWeight: 700, color: '#0F172A' },
-  filters: { display: 'flex', gap: 8, marginBottom: 16 },
-  filterBtn: { padding: '6px 16px', borderRadius: 20, border: '1px solid #E5E7EB', background: '#fff', cursor: 'pointer', fontSize: 13, color: '#64748B' },
-  filterActive: { background: '#2563EB', color: '#fff', border: '1px solid #1A56DB' },
-  loading: { textAlign: 'center', color: '#64748B', padding: 48 },
-  empty: { textAlign: 'center', color: '#94A3B8', padding: 48 },
-  table: { background: '#fff', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
-  tableHeader: { display: 'grid', gridTemplateColumns: '120px 1fr 120px 100px 130px 24px', gap: 12, padding: '12px 20px', background: '#F8FAFC', fontSize: 12, fontWeight: 600, color: '#64748B', borderBottom: '1px solid #F3F4F6' },
-  tableRow: { display: 'grid', gridTemplateColumns: '120px 1fr 120px 100px 130px 24px', gap: 12, padding: '14px 20px', alignItems: 'center', borderBottom: '1px solid #F9FAFB', cursor: 'pointer' },
-  quoteNum: { fontSize: 13, fontWeight: 600, color: '#2563EB' },
-  clientName: { fontSize: 14, color: '#0F172A' },
-  date: { fontSize: 13, color: '#64748B' },
-  amount: { fontSize: 14, fontWeight: 600, color: '#0F172A' },
-  badge: { fontSize: 11, padding: '3px 8px', borderRadius: 20, fontWeight: 500, display: 'inline-block' },
-  arrow: { fontSize: 18, color: '#94A3B8', textAlign: 'center' },
+  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
+  header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, gap: 12 },
+  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
+  subtitle: { fontSize: 14, color: '#94A3B8', fontWeight: 500, marginTop: 4 },
+  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' },
+  statsRow: { display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 24 },
+  stat: { flex: '1 1 140px', background: '#fff', borderRadius: 14, padding: '18px 20px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
+  statLabel: { fontSize: 12, fontWeight: 600, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' },
+  statValue: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, letterSpacing: '-0.8px' },
+  filters: { display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' },
+  filterBtn: { padding: '7px 18px', borderRadius: 20, border: '1.5px solid #E2E8F0', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#64748B' },
+  filterActive: { background: '#0F172A', color: '#fff', border: '1.5px solid #0F172A' },
+  loading: { textAlign: 'center', color: '#94A3B8', padding: 48, fontWeight: 500 },
+  empty: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '60px 0' },
+  table: { background: '#fff', borderRadius: 16, border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden' },
+  tableHeader: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: 11, fontWeight: 800, color: '#94A3B8', letterSpacing: '0.06em' },
+  tableRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', borderBottom: '1px solid #F8FAFC', cursor: 'pointer', transition: 'background 0.1s' },
+  badge: { fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 700, display: 'inline-block', whiteSpace: 'nowrap' },
+  viewBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#EFF6FF', borderRadius: 8, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  editBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#F8FAFC', borderRadius: 8, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };
