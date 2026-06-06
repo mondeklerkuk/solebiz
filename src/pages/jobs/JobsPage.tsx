@@ -72,7 +72,7 @@ export default function JobsPage() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: '36px 40px', maxWidth: 1200, margin: '0 auto' },
+  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 1200, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
   title: { fontSize: 24, fontWeight: 700, color: '#0F172A', margin: 0 },
   subtitle: { fontSize: 14, color: '#64748B', margin: '4px 0 0' },

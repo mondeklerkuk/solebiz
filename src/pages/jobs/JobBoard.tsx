@@ -57,8 +57,8 @@ function JobCard({ job, onStatusChange, onEdit }: any) {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  board: { display: 'flex', gap: 16, overflowX: 'auto', paddingBottom: 16 },
-  column: { minWidth: 200, flex: '1 1 200px' },
+  board: { display: 'flex', gap: 12, overflowX: 'auto' as any, paddingBottom: 16, WebkitOverflowScrolling: 'touch' as any },
+  column: { minWidth: 180, flex: '1 1 180px' },
   colHeader: { borderRadius: 8, padding: '8px 12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 },
   colLabel: { fontSize: 13, fontWeight: 600 },
   colCount: { fontSize: 13, fontWeight: 700, opacity: 0.7 },

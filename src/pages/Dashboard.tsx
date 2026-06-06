@@ -3,10 +3,10 @@ import { useAuth } from '../context/AuthContext';
 type Page = 'dashboard' | 'jobs' | 'quotes' | 'finance' | 'settings';
 
 const STATS = [
-  { label: 'Active Jobs', value: '—', change: '', color: '#2563EB', bg: '#EFF6FF' },
-  { label: 'Open Quotes', value: '—', change: '', color: '#10B981', bg: '#ECFDF5' },
-  { label: 'Revenue This Month', value: '£—', change: '', color: '#8B5CF6', bg: '#F5F3FF' },
-  { label: 'Outstanding', value: '£—', change: '', color: '#F59E0B', bg: '#FFFBEB' },
+  { label: 'Active Jobs', value: '—', color: '#2563EB', bg: '#EFF6FF' },
+  { label: 'Open Quotes', value: '—', color: '#10B981', bg: '#ECFDF5' },
+  { label: 'Revenue', value: '£—', color: '#8B5CF6', bg: '#F5F3FF' },
+  { label: 'Outstanding', value: '£—', color: '#F59E0B', bg: '#FFFBEB' },
 ];
 
 const MODULES = [
@@ -24,46 +24,40 @@ export default function Dashboard({ onNavigate }: { onNavigate: (p: Page) => voi
 
   return (
     <div style={s.page}>
-      {/* Top bar */}
       <div style={s.topBar}>
         <div>
           <p style={s.greeting}>{greeting} 👋</p>
           <h1 style={s.heading}>{biz}</h1>
         </div>
-        <div style={s.dateBadge}>{new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' })}</div>
+        <div style={s.dateBadge}>{new Date().toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' })}</div>
       </div>
 
-      {/* Stats row */}
       <div style={s.statsGrid}>
         {STATS.map(stat => (
           <div key={stat.label} style={s.statCard}>
-            <div style={{ ...s.statIcon, background: stat.bg }}>
-              <div style={{ width: 10, height: 10, borderRadius: 5, background: stat.color }} />
-            </div>
+            <div style={{ ...s.statDot, background: stat.color }} />
             <div style={s.statValue}>{stat.value}</div>
             <div style={s.statLabel}>{stat.label}</div>
           </div>
         ))}
       </div>
 
-      {/* Modules */}
       <div style={s.sectionHeader}>
         <h2 style={s.sectionTitle}>Modules</h2>
-        <span style={s.sectionSub}>Click to open</span>
       </div>
       <div style={s.modulesGrid}>
         {MODULES.map(m => (
-          <div key={m.label} style={{ ...s.moduleCard, ...(m.ready ? {} : s.moduleDisabled) }} onClick={() => m.ready && onNavigate(m.page)}>
-            <div style={{ ...s.moduleIconWrap, background: `${m.color}12`, border: `1px solid ${m.color}20` }}>
-              <span style={{ fontSize: 24 }}>{m.icon}</span>
+          <div key={m.label} style={{ ...s.moduleCard, ...(!m.ready ? s.moduleDisabled : {}) }} onClick={() => m.ready && onNavigate(m.page)}>
+            <div style={{ ...s.moduleIconWrap, background: `${m.color}12` }}>
+              <span style={{ fontSize: 22 }}>{m.icon}</span>
             </div>
             <div style={s.moduleInfo}>
               <div style={s.moduleLabel}>{m.label}</div>
               <div style={s.moduleDesc}>{m.desc}</div>
             </div>
-            <div style={{ ...s.moduleBadge, ...(m.ready ? { background: '#ECFDF5', color: '#059669' } : { background: '#F1F5F9', color: '#94A3B8' }) }}>
+            <span style={{ ...s.badge, ...(m.ready ? { background: '#ECFDF5', color: '#059669' } : { background: '#F1F5F9', color: '#94A3B8' }) }}>
               {m.ready ? '● Live' : 'Soon'}
-            </div>
+            </span>
           </div>
         ))}
       </div>
@@ -72,25 +66,24 @@ export default function Dashboard({ onNavigate }: { onNavigate: (p: Page) => voi
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: '36px 40px', maxWidth: 960, margin: '0 auto' },
-  topBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 },
-  greeting: { fontSize: 13, fontWeight: 500, color: '#94A3B8', marginBottom: 4, letterSpacing: '0.02em', textTransform: 'uppercase' },
-  heading: { fontSize: 30, fontWeight: 800, color: '#0F172A', letterSpacing: '-1px' },
-  dateBadge: { fontSize: 13, fontWeight: 500, color: '#64748B', background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, padding: '8px 14px' },
-  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 40 },
-  statCard: { background: '#fff', borderRadius: 16, padding: '22px 20px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
-  statIcon: { width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 },
-  statValue: { fontSize: 28, fontWeight: 800, color: '#0F172A', letterSpacing: '-1px', marginBottom: 4 },
-  statLabel: { fontSize: 13, fontWeight: 500, color: '#94A3B8' },
-  sectionHeader: { display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 16 },
-  sectionTitle: { fontSize: 18, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.5px' },
-  sectionSub: { fontSize: 13, color: '#94A3B8' },
-  modulesGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 },
-  moduleCard: { display: 'flex', alignItems: 'center', gap: 16, background: '#fff', borderRadius: 16, padding: '20px 22px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer', transition: 'box-shadow 0.15s, transform 0.1s' },
-  moduleDisabled: { opacity: 0.55, cursor: 'default' },
-  moduleIconWrap: { width: 48, height: 48, borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  moduleInfo: { flex: 1 },
+  page: { padding: 'clamp(20px, 4vw, 40px) clamp(16px, 4vw, 40px)', maxWidth: 960, margin: '0 auto' },
+  topBar: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 },
+  greeting: { fontSize: 12, fontWeight: 600, color: '#94A3B8', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  heading: { fontSize: 'clamp(22px, 4vw, 30px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
+  dateBadge: { fontSize: 13, fontWeight: 600, color: '#64748B', background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, padding: '7px 14px', whiteSpace: 'nowrap' },
+  statsGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12, marginBottom: 36 },
+  statCard: { background: '#fff', borderRadius: 16, padding: '20px 18px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
+  statDot: { width: 8, height: 8, borderRadius: 4, marginBottom: 14 },
+  statValue: { fontSize: 'clamp(22px, 4vw, 28px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-1px', marginBottom: 4 },
+  statLabel: { fontSize: 12, fontWeight: 500, color: '#94A3B8' },
+  sectionHeader: { marginBottom: 14 },
+  sectionTitle: { fontSize: 17, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.4px' },
+  modulesGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 12 },
+  moduleCard: { display: 'flex', alignItems: 'center', gap: 14, background: '#fff', borderRadius: 16, padding: '18px 20px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', cursor: 'pointer' },
+  moduleDisabled: { opacity: 0.5, cursor: 'default' },
+  moduleIconWrap: { width: 44, height: 44, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  moduleInfo: { flex: 1, minWidth: 0 },
   moduleLabel: { fontSize: 15, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.3px', marginBottom: 2 },
-  moduleDesc: { fontSize: 13, color: '#94A3B8', fontWeight: 500 },
-  moduleBadge: { fontSize: 12, fontWeight: 600, padding: '4px 10px', borderRadius: 20, flexShrink: 0 },
+  moduleDesc: { fontSize: 12, color: '#94A3B8', fontWeight: 500 },
+  badge: { fontSize: 11, fontWeight: 700, padding: '4px 10px', borderRadius: 20, flexShrink: 0, whiteSpace: 'nowrap' },
 };

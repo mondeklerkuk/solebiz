@@ -1,9 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --font: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
   --blue: #2563EB;
   --blue-light: #EFF6FF;
   --green: #10B981;
@@ -16,31 +16,58 @@
   --text-1: #0F172A;
   --text-2: #475569;
   --text-3: #94A3B8;
-  --radius: 14px;
-  --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,0.08);
+  --sidebar-w: 232px;
 }
 
 html { font-size: 14px; }
 
 body {
   font-family: var(--font);
-  font-feature-settings: 'cv02','cv03','cv04','cv11';
   background: var(--bg);
   color: var(--text-1);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  letter-spacing: -0.01em;
 }
 
-input, textarea, select, button {
-  font-family: var(--font);
-  font-feature-settings: 'cv02','cv03','cv04','cv11';
-  -webkit-font-smoothing: antialiased;
-  letter-spacing: -0.01em;
-}
-
+input, textarea, select, button { font-family: var(--font); -webkit-font-smoothing: antialiased; }
 input:focus, textarea:focus, select:focus { outline: none; }
 button { cursor: pointer; }
 
-h1, h2, h3 { letter-spacing: -0.03em; }
+/* Mobile nav toggle */
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #0F172A;
+  border: none;
+  color: white;
+  font-size: 18px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .mobile-menu-btn { display: flex; }
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 150;
+  }
+  .sidebar {
+    position: fixed !important;
+    left: -240px !important;
+    top: 0;
+    height: 100vh;
+    z-index: 160;
+    transition: left 0.25s ease;
+  }
+  .sidebar.open { left: 0 !important; }
+  .main-content { padding-top: 60px !important; }
+}

@@ -135,12 +135,12 @@ export default function QuotesPage() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: '36px 40px', maxWidth: 1000, margin: '0 auto' },
+  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 1000, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 },
   title: { fontSize: 24, fontWeight: 700, color: '#0F172A', margin: 0 },
   subtitle: { fontSize: 14, color: '#64748B', margin: '4px 0 0' },
   addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  statsRow: { display: 'flex', gap: 16, marginBottom: 20 },
+  statsRow: { display: 'flex', flexWrap: 'wrap' as any, gap: 12, marginBottom: 20 },
   stat: { flex: 1, background: '#fff', borderRadius: 12, padding: '16px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)' },
   statLabel: { fontSize: 12, color: '#64748B', marginBottom: 4 },
   statValue: { fontSize: 22, fontWeight: 700, color: '#0F172A' },

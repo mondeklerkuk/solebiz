@@ -16,40 +16,44 @@ const NAV = [
   { id: 'settings' as Page, label: 'Settings', icon: '⚙' },
 ];
 
-function Sidebar({ page, setPage, user, signOut }: any) {
+function Sidebar({ page, setPage, user, signOut, open, onClose }: any) {
   const initials = (user?.email || 'U').charAt(0).toUpperCase();
   const biz = user?.user_metadata?.business_name || 'My Business';
   return (
-    <aside style={s.sidebar}>
-      <div style={s.sidebarInner}>
-        <div style={s.logoRow}>
-          <div style={s.logoIcon}>S</div>
-          <span style={s.logoText}>SoleBiz</span>
-        </div>
-        <nav style={s.nav}>
-          {NAV.map(n => {
-            const active = page === n.id;
-            return (
-              <button key={n.id} style={{ ...s.navBtn, ...(active ? s.navActive : {}) }} onClick={() => setPage(n.id)}>
-                <span style={s.navIcon}>{n.icon}</span>
-                <span>{n.label}</span>
-                {active && <div style={s.navPill} />}
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-      <div style={s.sidebarFoot}>
-        <div style={s.userCard}>
-          <div style={s.avatar}>{initials}</div>
-          <div style={{ flex: 1, overflow: 'hidden' }}>
-            <div style={s.userName}>{biz}</div>
-            <div style={s.userEmail}>{user?.email}</div>
+    <>
+      {open && <div className="sidebar-overlay" onClick={onClose} />}
+      <aside className={`sidebar${open ? ' open' : ''}`} style={s.sidebar}>
+        <div style={s.sidebarInner}>
+          <div style={s.logoRow}>
+            <div style={s.logoIcon}>S</div>
+            <span style={s.logoText}>SoleBiz</span>
           </div>
+          <nav style={s.nav}>
+            {NAV.map(n => {
+              const active = page === n.id;
+              return (
+                <button key={n.id} style={{ ...s.navBtn, ...(active ? s.navActive : {}) }}
+                  onClick={() => { setPage(n.id); onClose(); }}>
+                  <span style={s.navIcon}>{n.icon}</span>
+                  <span>{n.label}</span>
+                  {active && <div style={s.navPill} />}
+                </button>
+              );
+            })}
+          </nav>
         </div>
-        <button style={s.signOut} onClick={signOut}>Sign out</button>
-      </div>
-    </aside>
+        <div style={s.sidebarFoot}>
+          <div style={s.userCard}>
+            <div style={s.avatar}>{initials}</div>
+            <div style={{ flex: 1, overflow: 'hidden' }}>
+              <div style={s.userName}>{biz}</div>
+              <div style={s.userEmail}>{user?.email}</div>
+            </div>
+          </div>
+          <button style={s.signOut} onClick={signOut}>Sign out</button>
+        </div>
+      </aside>
+    </>
   );
 }
 
@@ -57,10 +61,11 @@ function AppRoutes() {
   const { session, loading, signOut, user } = useAuth();
   const [showSignup, setShowSignup] = useState(false);
   const [page, setPage] = useState<Page>('dashboard');
+  const [menuOpen, setMenuOpen] = useState(false);
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
-      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: 22, fontWeight: 800, color: '#2563EB', letterSpacing: '-1px' }}>SoleBiz</span>
+      <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.5px' }}>SoleBiz</span>
     </div>
   );
 
@@ -74,13 +79,14 @@ function AppRoutes() {
     if (page === 'quotes') return <QuotesPage />;
     if (page === 'finance') return <Soon label="Finance" icon="💰" />;
     if (page === 'settings') return <Soon label="Settings" icon="⚙" />;
-    return <Dashboard onNavigate={setPage} />;
+    return <Dashboard onNavigate={(p: Page) => setPage(p)} />;
   };
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#F8FAFC' }}>
-      <Sidebar page={page} setPage={setPage} user={user} signOut={signOut} />
-      <main style={s.main}>{renderPage()}</main>
+      <button className="mobile-menu-btn" onClick={() => setMenuOpen(o => !o)}>☰</button>
+      <Sidebar page={page} setPage={setPage} user={user} signOut={signOut} open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <main className="main-content" style={s.main}>{renderPage()}</main>
     </div>
   );
 }
@@ -110,25 +116,24 @@ const s: Record<string, React.CSSProperties> = {
   sidebarInner: { padding: '28px 16px 0' },
   logoRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36, padding: '0 8px' },
   logoIcon: { width: 32, height: 32, borderRadius: 8, background: '#2563EB', color: '#fff', fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  logoText: { fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.5px' },
+  logoText: { fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' },
   nav: { display: 'flex', flexDirection: 'column', gap: 2 },
   navBtn: {
     display: 'flex', alignItems: 'center', gap: 10, width: '100%',
     padding: '10px 12px', borderRadius: 10, border: 'none',
     background: 'none', color: '#94A3B8', fontSize: 14, fontWeight: 500,
     cursor: 'pointer', position: 'relative', textAlign: 'left',
-    transition: 'color 0.15s, background 0.15s',
   },
-  navActive: { background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 600 },
+  navActive: { background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 700 },
   navIcon: { fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0 },
   navPill: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, background: '#2563EB' },
   sidebarFoot: { padding: '16px' },
   userCard: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px', background: 'rgba(255,255,255,0.06)', borderRadius: 12, marginBottom: 8 },
   avatar: { width: 32, height: 32, borderRadius: 8, background: '#2563EB', color: '#fff', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  userName: { fontSize: 13, fontWeight: 600, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  userName: { fontSize: 13, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
   userEmail: { fontSize: 11, color: '#64748B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 1 },
   signOut: { width: '100%', padding: '8px', background: 'none', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 8, color: '#64748B', fontSize: 13, fontWeight: 500, cursor: 'pointer' },
-  main: { flex: 1, overflowY: 'auto', minHeight: '100vh' },
+  main: { flex: 1, overflowY: 'auto', minHeight: '100vh', minWidth: 0 },
 };
 
 export default function App() {
