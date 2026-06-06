@@ -5,13 +5,15 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import JobsPage from './pages/jobs/JobsPage';
 import QuotesPage from './pages/quotes/QuotesPage';
+import SourcingPage from './pages/quotes/SourcingPage';
 
-type Page = 'dashboard' | 'jobs' | 'quotes' | 'finance' | 'settings';
+type Page = 'dashboard' | 'jobs' | 'quotes' | 'sourcing' | 'finance' | 'settings';
 
 const NAV = [
   { id: 'dashboard' as Page, label: 'Overview', icon: '▤' },
   { id: 'jobs' as Page, label: 'Jobs', icon: '🔨' },
   { id: 'quotes' as Page, label: 'Quotes', icon: '📋' },
+  { id: 'sourcing' as Page, label: 'Sourcing', icon: '🏗️' },
   { id: 'finance' as Page, label: 'Finance', icon: '💰' },
   { id: 'settings' as Page, label: 'Settings', icon: '⚙' },
 ];
@@ -65,7 +67,7 @@ function AppRoutes() {
 
   if (loading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#F8FAFC' }}>
-      <span style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 22, fontWeight: 800, color: '#2563EB', letterSpacing: '-0.5px' }}>SoleBiz</span>
+      <span style={{ fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 22, fontWeight: 800, color: '#2563EB' }}>SoleBiz</span>
     </div>
   );
 
@@ -77,6 +79,7 @@ function AppRoutes() {
   const renderPage = () => {
     if (page === 'jobs') return <JobsPage />;
     if (page === 'quotes') return <QuotesPage />;
+    if (page === 'sourcing') return <SourcingPage />;
     if (page === 'finance') return <Soon label="Finance" icon="💰" />;
     if (page === 'settings') return <Soon label="Settings" icon="⚙" />;
     return <Dashboard onNavigate={(p: Page) => setPage(p)} />;
@@ -102,28 +105,13 @@ function Soon({ label, icon }: { label: string; icon: string }) {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  sidebar: {
-    width: 232,
-    background: '#0F172A',
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    position: 'sticky',
-    top: 0,
-    height: '100vh',
-    flexShrink: 0,
-  },
+  sidebar: { width: 232, background: '#0F172A', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', position: 'sticky', top: 0, height: '100vh', flexShrink: 0 },
   sidebarInner: { padding: '28px 16px 0' },
   logoRow: { display: 'flex', alignItems: 'center', gap: 10, marginBottom: 36, padding: '0 8px' },
   logoIcon: { width: 32, height: 32, borderRadius: 8, background: '#2563EB', color: '#fff', fontSize: 16, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' },
   logoText: { fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.3px' },
   nav: { display: 'flex', flexDirection: 'column', gap: 2 },
-  navBtn: {
-    display: 'flex', alignItems: 'center', gap: 10, width: '100%',
-    padding: '10px 12px', borderRadius: 10, border: 'none',
-    background: 'none', color: '#94A3B8', fontSize: 14, fontWeight: 500,
-    cursor: 'pointer', position: 'relative', textAlign: 'left',
-  },
+  navBtn: { display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '10px 12px', borderRadius: 10, border: 'none', background: 'none', color: '#94A3B8', fontSize: 14, fontWeight: 500, cursor: 'pointer', position: 'relative', textAlign: 'left' },
   navActive: { background: 'rgba(255,255,255,0.08)', color: '#fff', fontWeight: 700 },
   navIcon: { fontSize: 15, width: 18, textAlign: 'center', flexShrink: 0 },
   navPill: { position: 'absolute', left: 0, top: '20%', bottom: '20%', width: 3, borderRadius: 2, background: '#2563EB' },
