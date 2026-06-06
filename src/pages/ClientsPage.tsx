@@ -96,7 +96,7 @@ export default function ClientsPage() {
                 {clientJobs.length === 0 ? <p style={s.none}>No jobs yet</p> : clientJobs.map(j => (
                   <div key={j.id} style={s.docRow}>
                     <span style={s.docTitle}>{j.title}</span>
-                    <span style={{ ...s.pill, background: '#EFF6FF', color: '#2563EB' }}>{j.status}</span>
+                    <span style={{ ...s.pill, background: '#EFF6FF', color: 'var(--accent-blue)' }}>{j.status}</span>
                     <span style={s.docDate}>{new Date(j.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</span>
                   </div>
                 ))}
@@ -135,7 +135,7 @@ export default function ClientsPage() {
 
 function ContactChip({ icon, val }: any) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: '#F8FAFC', borderRadius: 10, fontSize: 13, color: '#475569', fontWeight: 500 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: 'var(--bg-primary)', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-secondary)', fontWeight: 500 }}>
       <span>{icon}</span><span>{val}</span>
     </div>
   );
@@ -207,54 +207,54 @@ function ClientModal({ client, userId, onClose, onSaved }: any) {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 1100, margin: '0 auto' },
+  page: { padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,40px)', maxWidth: 1100, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
-  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
-  sub: { fontSize: 14, color: '#94A3B8', fontWeight: 500, marginTop: 4 },
-  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' },
+  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.8px' },
+  sub: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', fontWeight: 500, marginTop: 4 },
+  addBtn: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 'var(--text-13)', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' },
   layout: { display: 'grid', gridTemplateColumns: 'clamp(240px,30%,320px) 1fr', gap: 16, minHeight: 500 },
-  list: { background: '#fff', borderRadius: 16, border: '1px solid #F1F5F9', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
-  search: { padding: '12px 16px', border: 'none', borderBottom: '1px solid #F1F5F9', fontSize: 14, color: '#0F172A', fontFamily: 'inherit', outline: 'none', background: '#F8FAFC' },
-  empty: { padding: 32, textAlign: 'center', color: '#94A3B8', fontWeight: 500, fontSize: 14 },
+  list: { background: 'var(--bg-card)', borderRadius: 16, border: '1px solid #F1F5F9', overflow: 'hidden', display: 'flex', flexDirection: 'column' },
+  search: { padding: '12px 16px', border: 'none', borderBottom: '1px solid #F1F5F9', fontSize: 'var(--text-13)', color: 'var(--text-primary)', fontFamily: 'inherit', outline: 'none', background: 'var(--bg-primary)' },
+  empty: { padding: 32, textAlign: 'center', color: 'var(--text-tertiary)', fontWeight: 500, fontSize: 14 },
   clientRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', cursor: 'pointer', borderBottom: '1px solid #F8FAFC', transition: 'background 0.1s' },
   clientRowActive: { background: '#EFF6FF' },
-  avatar: { width: 36, height: 36, borderRadius: 10, background: '#2563EB', color: '#fff', fontSize: 15, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  avatar: { width: 36, height: 36, borderRadius: 10, background: 'var(--accent-blue)', color: 'var(--bg-card)', fontSize: 'var(--text-15)', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
   clientInfo: { flex: 1, overflow: 'hidden' },
-  clientName: { fontSize: 14, fontWeight: 700, color: '#0F172A', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
-  clientEmail: { fontSize: 12, color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 },
-  editRowBtn: { background: 'none', border: 'none', fontSize: 14, cursor: 'pointer', padding: 4, flexShrink: 0 },
-  detail: { background: '#fff', borderRadius: 16, border: '1px solid #F1F5F9', padding: 28, overflow: 'auto' },
+  clientName: { fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' },
+  clientEmail: { fontSize: 'var(--text-11)', color: 'var(--text-tertiary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', marginTop: 2 },
+  editRowBtn: { background: 'none', border: 'none', fontSize: 'var(--text-13)', cursor: 'pointer', padding: 4, flexShrink: 0 },
+  detail: { background: 'var(--bg-card)', borderRadius: 16, border: '1px solid #F1F5F9', padding: 28, overflow: 'auto' },
   detailEmpty: { display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 300, gap: 12 },
-  detailEmptyText: { fontSize: 15, color: '#94A3B8', fontWeight: 500 },
+  detailEmptyText: { fontSize: 'var(--text-15)', color: 'var(--text-tertiary)', fontWeight: 500 },
   detailHeader: { display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 },
-  detailAvatar: { width: 52, height: 52, borderRadius: 14, background: '#2563EB', color: '#fff', fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
-  detailName: { fontSize: 20, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.5px' },
-  detailCompany: { fontSize: 14, color: '#64748B', fontWeight: 500, marginTop: 2 },
-  editBtn: { marginLeft: 'auto', padding: '8px 16px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: '#fff', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer' },
+  detailAvatar: { width: 52, height: 52, borderRadius: 14, background: 'var(--accent-blue)', color: 'var(--bg-card)', fontSize: 'var(--text-20)', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 },
+  detailName: { fontSize: 20, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.5px' },
+  detailCompany: { fontSize: 'var(--text-13)', color: 'var(--text-secondary)', fontWeight: 500, marginTop: 2 },
+  editBtn: { marginLeft: 'auto', padding: '8px 16px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: 'var(--bg-card)', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer' },
   contactGrid: { display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 28 },
   section: { marginBottom: 24 },
-  sectionTitle: { fontSize: 14, fontWeight: 800, color: '#0F172A', marginBottom: 12, letterSpacing: '-0.2px' },
-  none: { fontSize: 14, color: '#94A3B8', fontStyle: 'italic' },
-  docRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: '#F8FAFC', borderRadius: 10, marginBottom: 6, flexWrap: 'wrap' },
-  docNum: { fontSize: 12, fontWeight: 700, color: '#2563EB' },
-  docTitle: { fontSize: 13, fontWeight: 600, color: '#0F172A', flex: 1 },
-  docAmount: { fontSize: 13, fontWeight: 700, color: '#0F172A' },
-  docDate: { fontSize: 12, color: '#94A3B8' },
-  pill: { fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 },
+  sectionTitle: { fontSize: 'var(--text-13)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12, letterSpacing: '-0.2px' },
+  none: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', fontStyle: 'italic' },
+  docRow: { display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', background: 'var(--bg-primary)', borderRadius: 10, marginBottom: 6, flexWrap: 'wrap' },
+  docNum: { fontSize: 'var(--text-11)', fontWeight: 700, color: 'var(--accent-blue)' },
+  docTitle: { fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-primary)', flex: 1 },
+  docAmount: { fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--text-primary)' },
+  docDate: { fontSize: 'var(--text-11)', color: 'var(--text-tertiary)' },
+  pill: { fontSize: 'var(--text-11)', fontWeight: 700, padding: '3px 10px', borderRadius: 20 },
 };
 
 const m: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
+  modal: { background: 'var(--bg-card)', borderRadius: 18, width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
   hdr: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #F1F5F9' },
-  htitle: { fontSize: 17, fontWeight: 800, color: '#0F172A' },
-  x: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#94A3B8' },
+  htitle: { fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' },
+  x: { background: 'none', border: 'none', fontSize: 'var(--text-17)', cursor: 'pointer', color: 'var(--text-tertiary)' },
   body: { padding: '20px 24px', overflowY: 'auto' },
   footer: { padding: '14px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center' },
-  lbl: { display: 'block', fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
-  inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', boxSizing: 'border-box' },
-  ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
-  save: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer' },
-  cancel: { background: '#fff', color: '#475569', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 18px', fontSize: 14, cursor: 'pointer' },
-  del: { background: '#FEF2F2', color: '#EF4444', border: '1.5px solid #FEE2E2', borderRadius: 10, padding: '11px 18px', fontSize: 14, cursor: 'pointer' },
+  lbl: { display: 'block', fontSize: 'var(--text-11)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', fontFamily: 'inherit', boxSizing: 'border-box' },
+  ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
+  save: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 10, padding: '11px 22px', fontSize: 'var(--text-13)', fontWeight: 700, cursor: 'pointer' },
+  cancel: { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 18px', fontSize: 'var(--text-13)', cursor: 'pointer' },
+  del: { background: '#FEF2F2', color: 'var(--accent-red)', border: '1.5px solid #FEE2E2', borderRadius: 10, padding: '11px 18px', fontSize: 'var(--text-13)', cursor: 'pointer' },
 };

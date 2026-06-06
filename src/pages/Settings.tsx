@@ -87,7 +87,7 @@ export default function Settings() {
   }
 
   const btnLabel = { idle: 'Save settings', saving: 'Saving…', saved: '✓ Saved!', error: '✗ Error — try again' }[saveStatus];
-  const btnColor = { idle: '#2563EB', saving: '#2563EB', saved: '#10B981', error: '#EF4444' }[saveStatus];
+  const btnColor = { idle: 'var(--accent-blue)', saving: 'var(--accent-blue)', saved: 'var(--accent-green)', error: 'var(--accent-red)' }[saveStatus];
 
   return (
     <div style={s.page}>
@@ -131,7 +131,7 @@ export default function Settings() {
                   <button style={s.dangerBtn} onClick={() => setLogo('')}>Remove</button>
                 )}
               </div>
-              {logo && <p style={{ fontSize: 11, color: '#10B981', marginTop: 8, fontWeight: 600 }}>✓ Logo ready</p>}
+              {logo && <p style={{ fontSize: 'var(--text-11)', color: 'var(--accent-green)', marginTop: 8, fontWeight: 600 }}>✓ Logo ready</p>}
             </div>
           </div>
           <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleLogo} />
@@ -193,27 +193,27 @@ function F({ label, v, on, ph }: any) {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
+  page: { padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28, flexWrap: 'wrap', gap: 12 },
-  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
-  sub: { fontSize: 14, color: '#94A3B8', fontWeight: 500, marginTop: 4 },
-  statusBanner: { color: '#fff', fontWeight: 700, fontSize: 14, padding: '10px 20px', borderRadius: 10, transition: 'background 0.3s' },
+  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.8px' },
+  sub: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', fontWeight: 500, marginTop: 4 },
+  statusBanner: { color: 'var(--bg-card)', fontWeight: 700, fontSize: 'var(--text-13)', padding: '10px 20px', borderRadius: 10, transition: 'background 0.3s' },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: 16, marginBottom: 24 },
-  card: { background: '#fff', borderRadius: 16, padding: 24, border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
-  cardTitle: { fontSize: 15, fontWeight: 800, color: '#0F172A', marginBottom: 20, letterSpacing: '-0.3px' },
-  cardSub: { fontSize: 13, color: '#94A3B8', marginTop: -14, marginBottom: 18 },
-  divider: { height: 1, background: '#F1F5F9', margin: '18px 0' },
+  card: { background: 'var(--bg-card)', borderRadius: 16, padding: 24, border: '1px solid #F1F5F9', boxShadow: 'var(--shadow-card)' },
+  cardTitle: { fontSize: 'var(--text-15)', fontWeight: 800, color: 'var(--text-primary)', marginBottom: 20, letterSpacing: '-0.3px' },
+  cardSub: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', marginTop: -14, marginBottom: 18 },
+  divider: { height: 1, background: 'var(--bg-primary)', margin: '18px 0' },
   logoRow: { display: 'flex', gap: 16, alignItems: 'flex-start', marginBottom: 20 },
-  logoBig: { width: 96, height: 96, borderRadius: 14, border: '2px dashed #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
-  logoHint: { fontSize: 10, color: '#94A3B8', fontWeight: 600 },
-  logoLabel: { fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 4 },
-  logoSub: { fontSize: 12, color: '#94A3B8', marginBottom: 10 },
-  outBtn: { padding: '8px 14px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: '#fff', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer', fontFamily: 'inherit' },
-  dangerBtn: { padding: '8px 14px', border: '1.5px solid #FEE2E2', borderRadius: 8, background: '#FEF2F2', fontSize: 13, fontWeight: 600, color: '#EF4444', cursor: 'pointer', fontFamily: 'inherit' },
-  lbl: { display: 'block', fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
-  inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', fontWeight: 500, boxSizing: 'border-box' },
-  ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
+  logoBig: { width: 96, height: 96, borderRadius: 14, border: '2px dashed #E2E8F0', background: 'var(--bg-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' },
+  logoHint: { fontSize: 10, color: 'var(--text-tertiary)', fontWeight: 600 },
+  logoLabel: { fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 },
+  logoSub: { fontSize: 'var(--text-11)', color: 'var(--text-tertiary)', marginBottom: 10 },
+  outBtn: { padding: '8px 14px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: 'var(--bg-card)', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit' },
+  dangerBtn: { padding: '8px 14px', border: '1.5px solid #FEE2E2', borderRadius: 8, background: '#FEF2F2', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--accent-red)', cursor: 'pointer', fontFamily: 'inherit' },
+  lbl: { display: 'block', fontSize: 'var(--text-11)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
+  inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', fontFamily: 'inherit', fontWeight: 500, boxSizing: 'border-box' },
+  ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
   saveRow: { display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 16 },
-  saveHint: { fontSize: 13, color: '#94A3B8', fontStyle: 'italic' },
-  saveBtn: { color: '#fff', border: 'none', borderRadius: 12, padding: '13px 36px', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.3s' },
+  saveHint: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', fontStyle: 'italic' },
+  saveBtn: { color: 'var(--bg-card)', border: 'none', borderRadius: 12, padding: '13px 36px', fontSize: 'var(--text-15)', fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.3s' },
 };

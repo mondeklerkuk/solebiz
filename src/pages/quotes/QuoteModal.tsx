@@ -175,7 +175,7 @@ export default function QuoteModal({ quote, clients, userId, onClose, onSaved }:
               <input style={{ ...s.inp, flex: 3 }} placeholder="Description of work" value={item.description} onChange={e => upd(i,'description',e.target.value)} />
               <input style={{ ...s.inp, width: 55, textAlign: 'center' }} type="number" min="1" step="any" value={item.quantity} onChange={e => upd(i,'quantity',e.target.value)} />
               <input style={{ ...s.inp, width: 85, textAlign: 'right' }} type="number" min="0" step="0.01" value={item.unit_price} onChange={e => upd(i,'unit_price',e.target.value)} />
-              <span style={{ width: 90, textAlign: 'right', fontSize: 14, fontWeight: 600, color: '#0F172A', lineHeight: '40px' }}>
+              <span style={{ width: 90, textAlign: 'right', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-primary)', lineHeight: '40px' }}>
                 £{((parseFloat(item.quantity)||0)*(parseFloat(item.unit_price)||0)).toFixed(2)}
               </span>
               <button style={s.rmBtn} onClick={() => setItems(p => p.filter((_,j) => j !== i))}>✕</button>
@@ -191,7 +191,7 @@ export default function QuoteModal({ quote, clients, userId, onClose, onSaved }:
                 <input type="checkbox" checked={vatEnabled} onChange={e => setVatEnabled(e.target.checked)} style={{ marginRight: 8 }} />
                 VAT (20%)
               </label>
-              <span style={{ color: vatEnabled ? '#0F172A' : '#94A3B8' }}>£{vatAmt.toFixed(2)}</span>
+              <span style={{ color: vatEnabled ? 'var(--text-primary)' : 'var(--text-tertiary)' }}>£{vatAmt.toFixed(2)}</span>
             </div>
             <div style={s.grandRow}><span>Total</span><span>£{total.toFixed(2)}</span></div>
           </div>
@@ -214,34 +214,34 @@ export default function QuoteModal({ quote, clients, userId, onClose, onSaved }:
 
 function Row({ children }: any) { return <div style={{ display: 'flex', gap: 12, marginBottom: 4 }}>{children}</div>; }
 function Col({ children }: any) { return <div style={{ flex: 1 }}>{children}</div>; }
-function L({ children, style: st }: any) { return <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6, marginTop: 12, textTransform: 'uppercase', letterSpacing: '0.06em', ...st }}>{children}</label>; }
+function L({ children, style: st }: any) { return <label style={{ display: 'block', fontSize: 'var(--text-11)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 6, marginTop: 12, textTransform: 'uppercase', letterSpacing: '0.06em', ...st }}>{children}</label>; }
 
 const s: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 660, maxHeight: '94vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.22)' },
+  modal: { background: 'var(--bg-card)', borderRadius: 18, width: '100%', maxWidth: 660, maxHeight: '94vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.22)' },
   hdr: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #F1F5F9' },
-  htitle: { fontSize: 17, fontWeight: 800, color: '#0F172A' },
-  x: { background: 'none', border: 'none', fontSize: 18, cursor: 'pointer', color: '#94A3B8' },
+  htitle: { fontSize: 17, fontWeight: 800, color: 'var(--text-primary)' },
+  x: { background: 'none', border: 'none', fontSize: 'var(--text-17)', cursor: 'pointer', color: 'var(--text-tertiary)' },
   body: { padding: '16px 24px', overflowY: 'auto', flex: 1 },
   footer: { padding: '14px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center' },
-  err: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 10, marginBottom: 12, fontSize: 13, fontWeight: 600 },
+  err: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 10, marginBottom: 12, fontSize: 'var(--text-13)', fontWeight: 600 },
   toggle: { display: 'flex', border: '1.5px solid #E2E8F0', borderRadius: 10, overflow: 'hidden' },
-  tBtn: { flex: 1, padding: '10px', border: 'none', background: '#F8FAFC', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#64748B', fontFamily: 'inherit' },
-  tActive: { background: '#0F172A', color: '#fff' },
-  inp: { width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', boxSizing: 'border-box' },
-  ta: { width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
+  tBtn: { flex: 1, padding: '10px', border: 'none', background: 'var(--bg-primary)', cursor: 'pointer', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-secondary)', fontFamily: 'inherit' },
+  tActive: { background: 'var(--text-primary)', color: 'var(--bg-card)' },
+  inp: { width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', fontFamily: 'inherit', boxSizing: 'border-box' },
+  ta: { width: '100%', padding: '10px 12px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
   quickAdd: { display: 'flex', gap: 8, marginTop: 8, marginBottom: 4 },
-  quickAddBtn: { padding: '10px 16px', background: '#EFF6FF', color: '#2563EB', border: '1.5px solid #BFDBFE', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' },
-  itemsHdr: { display: 'flex', gap: 8, fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' },
+  quickAddBtn: { padding: '10px 16px', background: '#EFF6FF', color: 'var(--accent-blue)', border: '1.5px solid #BFDBFE', borderRadius: 10, fontSize: 'var(--text-13)', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' },
+  itemsHdr: { display: 'flex', gap: 8, fontSize: 'var(--text-11)', fontWeight: 700, color: 'var(--text-tertiary)', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.04em' },
   itemRow: { display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 },
-  rmBtn: { width: 28, height: 28, border: 'none', background: '#FEF2F2', color: '#EF4444', borderRadius: 6, cursor: 'pointer', fontSize: 11, flexShrink: 0 },
-  addItem: { width: '100%', padding: '9px', border: '1.5px dashed #E2E8F0', borderRadius: 10, background: 'none', color: '#94A3B8', fontSize: 13, fontWeight: 600, cursor: 'pointer', marginTop: 4, fontFamily: 'inherit' },
-  totals: { background: '#F8FAFC', borderRadius: 12, padding: '14px 16px', marginTop: 16, marginBottom: 8 },
-  totRow: { display: 'flex', justifyContent: 'space-between', fontSize: 14, color: '#64748B', marginBottom: 8 },
-  vatRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14, marginBottom: 8 },
-  vatLabel: { display: 'flex', alignItems: 'center', color: '#475569', fontWeight: 500, cursor: 'pointer' },
-  grandRow: { display: 'flex', justifyContent: 'space-between', fontSize: 17, fontWeight: 800, color: '#0F172A', borderTop: '2px solid #E2E8F0', paddingTop: 10, marginTop: 4 },
-  saveBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer' },
-  cancelBtn: { background: '#fff', color: '#475569', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 18px', fontSize: 14, cursor: 'pointer' },
-  delBtn: { background: '#FEF2F2', color: '#EF4444', border: '1.5px solid #FEE2E2', borderRadius: 10, padding: '11px 18px', fontSize: 14, cursor: 'pointer' },
+  rmBtn: { width: 28, height: 28, border: 'none', background: '#FEF2F2', color: 'var(--accent-red)', borderRadius: 6, cursor: 'pointer', fontSize: 'var(--text-11)', flexShrink: 0 },
+  addItem: { width: '100%', padding: '9px', border: '1.5px dashed #E2E8F0', borderRadius: 10, background: 'none', color: 'var(--text-tertiary)', fontSize: 'var(--text-13)', fontWeight: 600, cursor: 'pointer', marginTop: 4, fontFamily: 'inherit' },
+  totals: { background: 'var(--bg-primary)', borderRadius: 12, padding: '14px 16px', marginTop: 16, marginBottom: 8 },
+  totRow: { display: 'flex', justifyContent: 'space-between', fontSize: 'var(--text-13)', color: 'var(--text-secondary)', marginBottom: 8 },
+  vatRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 'var(--text-13)', marginBottom: 8 },
+  vatLabel: { display: 'flex', alignItems: 'center', color: 'var(--text-secondary)', fontWeight: 500, cursor: 'pointer' },
+  grandRow: { display: 'flex', justifyContent: 'space-between', fontSize: 17, fontWeight: 800, color: 'var(--text-primary)', borderTop: '2px solid #E2E8F0', paddingTop: 10, marginTop: 4 },
+  saveBtn: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 'var(--text-13)', fontWeight: 700, cursor: 'pointer' },
+  cancelBtn: { background: 'var(--bg-card)', color: 'var(--text-secondary)', border: '1.5px solid #E2E8F0', borderRadius: 10, padding: '11px 18px', fontSize: 'var(--text-13)', cursor: 'pointer' },
+  delBtn: { background: '#FEF2F2', color: 'var(--accent-red)', border: '1.5px solid #FEE2E2', borderRadius: 10, padding: '11px 18px', fontSize: 'var(--text-13)', cursor: 'pointer' },
 };

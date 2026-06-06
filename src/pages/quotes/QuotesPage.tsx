@@ -5,13 +5,13 @@ import QuoteModal from './QuoteModal';
 import DocumentViewer from './DocumentViewer';
 
 export const QUOTE_STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  draft:    { bg: '#F8FAFC', text: '#1E293B', border: '#E2E8F0' },
-  sent:     { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
-  viewed:   { bg: '#FFF7ED', text: '#D97706', border: '#FED7AA' },
-  accepted: { bg: '#F0FDF4', text: '#059669', border: '#BBF7D0' },
-  declined: { bg: '#FEF2F2', text: '#DC2626', border: '#FECACA' },
-  invoiced: { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
-  paid:     { bg: '#ECFDF5', text: '#065F46', border: '#6EE7B7' },
+  draft:    { bg: 'var(--bg-primary)', text: 'var(--text-primary)', border: 'rgba(142,142,147,0.2)' },
+  sent:     { bg: 'rgba(0,113,227,0.12)', text: 'var(--accent-blue)', border: 'rgba(0,113,227,0.3)' },
+  viewed:   { bg: 'rgba(255,159,10,0.12)', text: 'var(--accent-orange)', border: 'rgba(255,159,10,0.3)' },
+  accepted: { bg: 'rgba(48,209,88,0.12)', text: 'var(--accent-green)', border: 'rgba(48,209,88,0.3)' },
+  declined: { bg: 'rgba(255,59,48,0.12)', text: 'var(--accent-red)', border: 'rgba(255,59,48,0.3)' },
+  invoiced: { bg: 'rgba(191,90,242,0.12)', text: 'var(--accent-purple)', border: 'rgba(191,90,242,0.3)' },
+  paid:     { bg: 'rgba(48,209,88,0.12)', text: 'var(--accent-green)', border: 'rgba(48,209,88,0.3)' },
 };
 
 export const QUOTE_STATUS_LABELS: Record<string, string> = {
@@ -77,7 +77,7 @@ export default function QuotesPage() {
       {/* Stats */}
       <div style={s.statsRow}>
         {[
-          { label: 'Total Value', value: `£${totalValue.toFixed(2)}`, color: '#0F172A' },
+          { label: 'Total Value', value: `£${totalValue.toFixed(2)}`, color: 'var(--text-primary)' },
           { label: 'Paid', value: `£${paidValue.toFixed(2)}`, color: '#059669' },
           { label: 'Outstanding', value: `£${outstanding.toFixed(2)}`, color: outstanding > 0 ? '#D97706' : '#059669' },
         ].map(st => (
@@ -102,7 +102,7 @@ export default function QuotesPage() {
       ) : filtered.length === 0 ? (
         <div style={s.empty}>
           <span style={{ fontSize: 40 }}>📋</span>
-          <p style={{ color: '#94A3B8', fontWeight: 500 }}>No documents yet. Create your first quote!</p>
+          <p style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>No documents yet. Create your first quote!</p>
         </div>
       ) : (
         <div style={s.table}>
@@ -119,14 +119,14 @@ export default function QuotesPage() {
             const col = QUOTE_STATUS_COLORS[q.status] || QUOTE_STATUS_COLORS.draft;
             return (
               <div key={q.id} style={s.tableRow} onClick={() => { setEditingQuote(q); setModalOpen(true); }}>
-                <span style={{ flex: '0 0 120px', fontSize: 13, fontWeight: 700, color: '#2563EB' }}>{q.quote_number}</span>
-                <span style={{ flex: 1, fontSize: 14, color: '#0F172A', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ flex: '0 0 120px', fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--accent-blue)' }}>{q.quote_number}</span>
+                <span style={{ flex: 1, fontSize: 'var(--text-13)', color: 'var(--text-primary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {q.client?.name || '—'}
                 </span>
-                <span style={{ flex: '0 0 110px', fontSize: 13, color: '#94A3B8', display: window.innerWidth < 600 ? 'none' : 'block' }}>
+                <span style={{ flex: '0 0 110px', fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', display: window.innerWidth < 600 ? 'none' : 'block' }}>
                   {new Date(q.issue_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
                 </span>
-                <span style={{ flex: '0 0 100px', fontSize: 14, fontWeight: 700, color: '#0F172A', textAlign: 'right' }}>
+                <span style={{ flex: '0 0 100px', fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--text-primary)', textAlign: 'right' }}>
                   £{(q.total || 0).toFixed(2)}
                 </span>
                 <span style={{ flex: '0 0 110px' }}>
@@ -168,24 +168,24 @@ export default function QuotesPage() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
+  page: { padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, gap: 12 },
-  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
-  subtitle: { fontSize: 14, color: '#94A3B8', fontWeight: 500, marginTop: 4 },
-  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' },
+  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.8px' },
+  subtitle: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', fontWeight: 500, marginTop: 4 },
+  addBtn: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 'var(--text-13)', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' },
   statsRow: { display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 24 },
-  stat: { flex: '1 1 140px', background: '#fff', borderRadius: 14, padding: '18px 20px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
-  statLabel: { fontSize: 12, fontWeight: 600, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' },
+  stat: { flex: '1 1 140px', background: 'var(--bg-card)', borderRadius: 14, padding: '18px 20px', border: '1px solid #F1F5F9', boxShadow: 'var(--shadow-card)' },
+  statLabel: { fontSize: 'var(--text-11)', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' },
   statValue: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, letterSpacing: '-0.8px' },
   filters: { display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' },
-  filterBtn: { padding: '7px 18px', borderRadius: 20, border: '1.5px solid #E2E8F0', background: '#fff', cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#64748B' },
-  filterActive: { background: '#0F172A', color: '#fff', border: '1.5px solid #0F172A' },
-  loading: { textAlign: 'center', color: '#94A3B8', padding: 48, fontWeight: 500 },
+  filterBtn: { padding: '7px 18px', borderRadius: 20, border: '1.5px solid #E2E8F0', background: 'var(--bg-card)', cursor: 'pointer', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-secondary)' },
+  filterActive: { background: 'var(--text-primary)', color: 'var(--bg-card)', border: '1.5px solid #0F172A' },
+  loading: { textAlign: 'center', color: 'var(--text-tertiary)', padding: 48, fontWeight: 500 },
   empty: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '60px 0' },
-  table: { background: '#fff', borderRadius: 16, border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden' },
-  tableHeader: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: 11, fontWeight: 800, color: '#94A3B8', letterSpacing: '0.06em' },
+  table: { background: 'var(--bg-card)', borderRadius: 16, border: '1px solid #F1F5F9', boxShadow: 'var(--shadow-card)', overflow: 'hidden' },
+  tableHeader: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: 'var(--bg-primary)', borderBottom: '1px solid #E2E8F0', fontSize: 'var(--text-11)', fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: '0.06em' },
   tableRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', borderBottom: '1px solid #F8FAFC', cursor: 'pointer', transition: 'background 0.1s' },
-  badge: { fontSize: 11, padding: '3px 10px', borderRadius: 20, fontWeight: 700, display: 'inline-block', whiteSpace: 'nowrap' },
-  viewBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#EFF6FF', borderRadius: 8, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  editBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#F8FAFC', borderRadius: 8, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  badge: { fontSize: 'var(--text-11)', padding: '3px 10px', borderRadius: 20, fontWeight: 700, display: 'inline-block', whiteSpace: 'nowrap' },
+  viewBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#EFF6FF', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--text-13)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  editBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: 'var(--bg-primary)', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--text-13)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
 };

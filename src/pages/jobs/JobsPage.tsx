@@ -10,12 +10,12 @@ export const STATUS_LABELS: Record<string, string> = {
 };
 
 export const STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  enquiry:    { bg: '#F8FAFC', text: '#1E293B', border: '#E2E8F0' },
-  quoted:     { bg: '#EFF6FF', text: '#2563EB', border: '#BFDBFE' },
-  confirmed:  { bg: '#F0FDF4', text: '#15803D', border: '#BBF7D0' },
-  in_progress:{ bg: '#FFF7ED', text: '#C2410C', border: '#FED7AA' },
-  completed:  { bg: '#F5F3FF', text: '#7C3AED', border: '#DDD6FE' },
-  archived:   { bg: '#F8FAFC', text: '#94A3B8', border: '#E2E8F0' },
+  enquiry:    { bg: 'var(--bg-primary)', text: 'var(--text-primary)', border: 'rgba(142,142,147,0.2)' },
+  quoted:     { bg: 'rgba(0,113,227,0.12)', text: 'var(--accent-blue)', border: 'rgba(0,113,227,0.3)' },
+  confirmed:  { bg: 'rgba(48,209,88,0.12)', text: '#15803D', border: 'rgba(48,209,88,0.3)' },
+  in_progress:{ bg: 'rgba(255,159,10,0.12)', text: '#C2410C', border: 'rgba(255,159,10,0.3)' },
+  completed:  { bg: 'rgba(191,90,242,0.12)', text: 'var(--accent-purple)', border: 'rgba(191,90,242,0.3)' },
+  archived:   { bg: 'var(--bg-primary)', text: 'var(--text-tertiary)', border: 'rgba(142,142,147,0.2)' },
 };
 
 export default function JobsPage() {
@@ -72,10 +72,10 @@ export default function JobsPage() {
 }
 
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 'clamp(16px,4vw,36px) clamp(14px,4vw,40px)', maxWidth: 1200, margin: '0 auto' },
+  page: { padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,40px)', maxWidth: 1200, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24 },
-  title: { fontSize: 24, fontWeight: 700, color: '#0F172A', margin: 0 },
-  subtitle: { fontSize: 14, color: '#64748B', margin: '4px 0 0' },
-  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 14, fontWeight: 600, cursor: 'pointer' },
-  loading: { textAlign: 'center', color: '#64748B', padding: 48 },
+  title: { fontSize: 'var(--text-24)', fontWeight: 700, color: 'var(--text-primary)', margin: 0 },
+  subtitle: { fontSize: 'var(--text-13)', color: 'var(--text-secondary)', margin: '4px 0 0' },
+  addBtn: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 10, padding: '10px 20px', fontSize: 'var(--text-13)', fontWeight: 600, cursor: 'pointer' },
+  loading: { textAlign: 'center', color: 'var(--text-secondary)', padding: 48 },
 };
