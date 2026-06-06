@@ -45,13 +45,25 @@ function Sidebar({ page, setPage, user, signOut }: any) {
 
         {/* Nav */}
         <nav style={{ display: 'flex', flexDirection: 'column', gap: 2, flex: 1 }}>
-          {ALL_NAV.map(n => (
-            <button key={n.id} className={`nav-btn${page === n.id ? ' active' : ''}`} onClick={() => setPage(n.id)}>
-              <span style={{ fontSize: 16, width: 20, textAlign: 'center', flexShrink: 0 }}>{n.icon}</span>
-              <span className="sidebar-label">{n.label}</span>
-              {page === n.id && <div className="nav-pill" />}
-            </button>
-          ))}
+          {ALL_NAV.map(n => {
+            const active = page === n.id;
+            return (
+              <button key={n.id} onClick={() => setPage(n.id)} style={{
+                display:'flex', alignItems:'center', gap:10, width:'100%',
+                padding:'10px 12px', borderRadius:10, border:'none',
+                background: active ? 'rgba(255,255,255,0.12)' : 'none',
+                color: active ? '#fff' : 'rgba(235,235,245,0.45)',
+                fontSize:14, fontWeight: active ? 600 : 500,
+                cursor:'pointer', position:'relative', textAlign:'left',
+                fontFamily:'inherit', minHeight:44,
+                transition:'all 0.15s cubic-bezier(0.25,0.46,0.45,0.94)',
+              }}>
+                <span style={{ fontSize:16, width:20, textAlign:'center', flexShrink:0 }}>{n.icon}</span>
+                <span className="sidebar-label">{n.label}</span>
+                {active && <div style={{ position:'absolute', left:0, top:'20%', bottom:'20%', width:3, borderRadius:2, background:'#0071E3' }} />}
+              </button>
+            );
+          })}
         </nav>
       </div>
 
