@@ -44,47 +44,15 @@ export default function SourcingPage() {
     setSearched(true);
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/source', {
         method: 'POST',
-        headers: {
-          'content-type': 'application/json',
-          'anthropic-dangerous-direct-browser-access': 'true',
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 2000,
-          system: `You are a UK trade supplier sourcing assistant. Return ONLY valid JSON, no markdown, no preamble.
-Return this exact structure:
-{
-  "results": [
-    {
-      "title": "Product name and spec",
-      "source": "Supplier (Screwfix/Toolstation/Travis Perkins/B&Q/Amazon/HSS Hire)",
-      "snippet": "Brief description with key specs",
-      "price": "£X.XX per unit/pack/m²",
-      "link": "https://www.screwfix.com",
-      "delivery": "Next day delivery"
-    }
-  ],
-  "analysis": {
-    "summary": "1-2 sentence market overview",
-    "topPick": "Best value option and why",
-    "tips": ["Tip 1", "Tip 2", "Tip 3"]
-  }
-}
-Include 5-7 results from real UK trade suppliers with realistic 2025 UK prices.`,
-          messages: [{ role: 'user', content: `Find UK suppliers for: ${q}` }],
-        }),
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ query: q }),
       });
 
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error((err as any)?.error?.message || `API error ${res.status}`);
-      }
-
+      if (!res.ok) throw new Error(`API error ${res.status}`);
       const data = await res.json();
       const text = data.content?.[0]?.text || '';
-      // Strip any markdown fences
       const clean = text.replace(/```json|```/g, '').trim();
       const parsed = JSON.parse(clean);
       setResults(parsed.results || []);
