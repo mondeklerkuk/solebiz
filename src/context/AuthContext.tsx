@@ -6,6 +6,7 @@ const AuthContext = createContext({
   user: null as any,
   loading: true,
   signOut: async () => {},
+  refreshUser: async () => {},
 });
 
 export function AuthProvider({ children }: { children: any }) {
@@ -17,16 +18,26 @@ export function AuthProvider({ children }: { children: any }) {
       setSession(data.session);
       setLoading(false);
     });
-    const { data: listener } = supabase.auth.onAuthStateChange((_e: any, s: any) => setSession(s));
+    const { data: listener } = supabase.auth.onAuthStateChange((_e: any, s: any) => {
+      setSession(s);
+    });
     return () => listener.subscription.unsubscribe();
   }, []);
+
+  async function refreshUser() {
+    const { data } = await supabase.auth.getUser();
+    if (data?.user) {
+      setSession((prev: any) => prev ? { ...prev, user: data.user } : prev);
+    }
+  }
 
   return (
     <AuthContext.Provider value={{
       session,
       user: session?.user ?? null,
       loading,
-      signOut: () => supabase.auth.signOut()
+      signOut: () => supabase.auth.signOut(),
+      refreshUser,
     }}>
       {children}
     </AuthContext.Provider>

@@ -126,7 +126,7 @@ export default function ClientsPage() {
           client={editing}
           userId={user.id}
           onClose={() => setModalOpen(false)}
-          onSaved={() => { setModalOpen(false); fetchClients(); if (editing && selected?.id === editing.id) selectClient({ ...editing }); }}
+          onSaved={async () => { setModalOpen(false); await fetchClients(); }}
         />
       )}
     </div>
@@ -157,9 +157,15 @@ function ClientModal({ client, userId, onClose, onSaved }: any) {
     if (!form.name.trim()) return;
     setSaving(true);
     const payload = { ...form, user_id: userId, updated_at: new Date().toISOString() };
-    if (isEdit) await supabase.from('clients').update(payload).eq('id', client.id);
-    else await supabase.from('clients').insert({ ...payload, created_at: new Date().toISOString() });
-    setSaving(false); onSaved();
+    if (isEdit) {
+      const { error } = await supabase.from('clients').update(payload).eq('id', client.id);
+      if (error) console.error('Update error:', error);
+    } else {
+      const { error } = await supabase.from('clients').insert({ ...payload });
+      if (error) console.error('Insert error:', error);
+    }
+    setSaving(false);
+    onSaved();
   }
 
   async function del() {

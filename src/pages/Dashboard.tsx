@@ -26,7 +26,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (p: Page) => voi
     <div style={s.page}>
       <div style={s.topBar}>
         <div style={s.bizInfo}>
-          {logo && <img src={logo} style={{ height: 44, maxWidth: 120, objectFit: 'contain', borderRadius: 8 }} />}
+          {logo && (
+            <img src={logo} style={{ height: 56, maxWidth: 160, objectFit: 'contain', borderRadius: 10, background: '#fff', padding: 4, border: '1px solid #E2E8F0' }} />
+          )}
           <div>
             <p style={s.greeting}>{greeting} 👋</p>
             <h1 style={s.heading}>{biz}</h1>

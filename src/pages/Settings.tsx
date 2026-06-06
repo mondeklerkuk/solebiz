@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
 
 export default function Settings() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth() as any;
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [logo, setLogo] = useState('');
@@ -50,6 +50,8 @@ export default function Settings() {
   async function save() {
     setSaving(true);
     await supabase.auth.updateUser({ data: { ...form, logo } });
+    // Refresh the user in context so dashboard updates immediately
+    await refreshUser();
     setSaving(false); setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   }
@@ -66,8 +68,10 @@ export default function Settings() {
           <h2 style={s.cardTitle}>Business Identity</h2>
           <div style={s.logoRow}>
             <div style={s.logoBig} onClick={() => fileRef.current?.click()}>
-              {logo ? <img src={logo} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }} />
-                : <><span style={{ fontSize: 30 }}>🏢</span><span style={s.logoHint}>Click to upload</span></>}
+              {logo
+                ? <img src={logo} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 12 }} />
+                : <><span style={{ fontSize: 30 }}>🏢</span><span style={s.logoHint}>Click to upload</span></>
+              }
             </div>
             <div>
               <p style={s.logoLabel}>Business Logo</p>
@@ -101,9 +105,9 @@ export default function Settings() {
         </section>
 
         <section style={s.card}>
-          <h2 style={s.cardTitle}>Quote & Invoice Defaults</h2>
+          <h2 style={s.cardTitle}>Invoice Defaults</h2>
           <F label="Payment terms" v={form.payment_terms} on={set('payment_terms')} ph="Payment due within 30 days" />
-          <div style={s.fw}>
+          <div style={{ marginBottom: 14 }}>
             <label style={s.lbl}>Default footer notes</label>
             <textarea style={s.ta} value={form.invoice_notes} onChange={set('invoice_notes')} rows={3} placeholder="Thank you for your business." />
           </div>
@@ -111,8 +115,8 @@ export default function Settings() {
       </div>
 
       <div style={s.saveRow}>
-        <button style={{ ...s.saveBtn, opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>
-          {saved ? '✓ Saved!' : saving ? 'Saving…' : 'Save settings'}
+        <button style={{ ...s.saveBtn, background: saved ? '#10B981' : '#2563EB', opacity: saving ? 0.7 : 1 }} onClick={save} disabled={saving}>
+          {saved ? '✓ Saved! Dashboard updated.' : saving ? 'Saving…' : 'Save settings'}
         </button>
       </div>
     </div>
@@ -143,12 +147,11 @@ const s: Record<string, React.CSSProperties> = {
   logoHint: { fontSize: 10, color: '#94A3B8', fontWeight: 600, textAlign: 'center' },
   logoLabel: { fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 4 },
   logoSub: { fontSize: 12, color: '#94A3B8', marginBottom: 10 },
-  outBtn: { padding: '7px 14px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: '#fff', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer', marginRight: 8 },
-  dangerBtn: { padding: '7px 14px', border: '1.5px solid #FEE2E2', borderRadius: 8, background: '#FEF2F2', fontSize: 13, fontWeight: 600, color: '#EF4444', cursor: 'pointer' },
-  fw: { marginBottom: 14 },
+  outBtn: { padding: '7px 14px', border: '1.5px solid #E2E8F0', borderRadius: 8, background: '#fff', fontSize: 13, fontWeight: 600, color: '#475569', cursor: 'pointer', marginRight: 8, fontFamily: 'inherit' },
+  dangerBtn: { padding: '7px 14px', border: '1.5px solid #FEE2E2', borderRadius: 8, background: '#FEF2F2', fontSize: 13, fontWeight: 600, color: '#EF4444', cursor: 'pointer', fontFamily: 'inherit' },
   lbl: { display: 'block', fontSize: 11, fontWeight: 700, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
   inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', fontWeight: 500, boxSizing: 'border-box' },
   ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 14, color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
   saveRow: { display: 'flex', justifyContent: 'flex-end' },
-  saveBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, padding: '13px 36px', fontSize: 15, fontWeight: 700, cursor: 'pointer' },
+  saveBtn: { color: '#fff', border: 'none', borderRadius: 12, padding: '13px 36px', fontSize: 15, fontWeight: 700, cursor: 'pointer', transition: 'background 0.3s', fontFamily: 'inherit' },
 };
