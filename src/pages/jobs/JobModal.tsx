@@ -106,7 +106,7 @@ export default function JobModal({ job, clients, userId, onClose, onSaved }: Pro
           ) : (
             <div style={s.newClientBox}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                <span style={{ fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-primary)' }}>New client</span>
+                <span style={{ fontSize: 'var(--text-13)', fontWeight: 600, color: '#0F172A' }}>New client</span>
                 <button style={s.linkBtn} onClick={() => setShowNewClient(false)}>Use existing</button>
               </div>
               <input style={{ ...s.input, marginBottom: 8 }} placeholder="Client name *" value={newClientName} onChange={e => setNewClientName(e.target.value)} />
@@ -136,20 +136,20 @@ export default function JobModal({ job, clients, userId, onClose, onSaved }: Pro
 
 const s: Record<string, React.CSSProperties> = {
   overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: 'var(--bg-card)', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
+  modal: { background: '#fff', borderRadius: 16, width: '100%', maxWidth: 520, maxHeight: '90vh', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
   modalHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #F3F4F6' },
-  modalTitle: { fontSize: 'var(--text-17)', fontWeight: 700, color: 'var(--text-primary)', margin: 0 },
-  closeBtn: { background: 'none', border: 'none', fontSize: 'var(--text-17)', cursor: 'pointer', color: 'var(--text-tertiary)', padding: 4 },
+  modalTitle: { fontSize: 'var(--text-17)', fontWeight: 700, color: '#0F172A', margin: 0 },
+  closeBtn: { background: 'none', border: 'none', fontSize: 'var(--text-17)', cursor: 'pointer', color: '#94A3B8', padding: 4 },
   body: { padding: '20px 24px', overflowY: 'auto', flex: 1 },
   footer: { padding: '16px 24px', borderTop: '1px solid #F3F4F6', display: 'flex', alignItems: 'center' },
   error: { background: '#FEF2F2', color: '#DC2626', padding: '10px 12px', borderRadius: 8, marginBottom: 16, fontSize: 14 },
-  label: { display: 'block', fontSize: 'var(--text-13)', fontWeight: 500, color: 'var(--text-primary)', marginBottom: 6, marginTop: 14 },
-  input: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', boxSizing: 'border-box' },
-  textarea: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 'var(--text-13)', color: 'var(--text-primary)', background: 'var(--bg-primary)', boxSizing: 'border-box', minHeight: 80, resize: 'vertical' },
-  newClientBox: { background: 'var(--bg-primary)', border: '1px solid #E5E7EB', borderRadius: 8, padding: 12 },
+  label: { display: 'block', fontSize: 'var(--text-13)', fontWeight: 500, color: '#0F172A', marginBottom: 6, marginTop: 14 },
+  input: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 'var(--text-13)', color: '#0F172A', background: '#F8FAFC', boxSizing: 'border-box' },
+  textarea: { width: '100%', padding: '10px 12px', border: '1px solid #D1D5DB', borderRadius: 8, fontSize: 'var(--text-13)', color: '#0F172A', background: '#F8FAFC', boxSizing: 'border-box', minHeight: 80, resize: 'vertical' },
+  newClientBox: { background: '#F8FAFC', border: '1px solid #E5E7EB', borderRadius: 8, padding: 12 },
   saveBtn: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 8, padding: '10px 20px', fontSize: 'var(--text-13)', fontWeight: 600, cursor: 'pointer' },
-  cancelBtn: { background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid #D1D5DB', borderRadius: 8, padding: '10px 16px', fontSize: 'var(--text-13)', cursor: 'pointer' },
-  deleteBtn: { background: 'var(--bg-card)', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 16px', fontSize: 'var(--text-13)', cursor: 'pointer' },
-  secondaryBtn: { background: 'var(--bg-card)', color: 'var(--accent-blue)', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 'var(--text-13)', cursor: 'pointer', whiteSpace: 'nowrap' },
-  linkBtn: { background: 'none', border: 'none', color: 'var(--accent-blue)', fontSize: 'var(--text-11)', cursor: 'pointer', padding: 0 },
+  cancelBtn: { background: '#fff', color: '#0F172A', border: '1px solid #D1D5DB', borderRadius: 8, padding: '10px 16px', fontSize: 'var(--text-13)', cursor: 'pointer' },
+  deleteBtn: { background: '#fff', color: '#DC2626', border: '1px solid #FCA5A5', borderRadius: 8, padding: '10px 16px', fontSize: 'var(--text-13)', cursor: 'pointer' },
+  secondaryBtn: { background: '#fff', color: '#2563EB', border: '1px solid #BFDBFE', borderRadius: 8, padding: '10px 14px', fontSize: 'var(--text-13)', cursor: 'pointer', whiteSpace: 'nowrap' },
+  linkBtn: { background: 'none', border: 'none', color: '#2563EB', fontSize: 'var(--text-11)', cursor: 'pointer', padding: 0 },
 };

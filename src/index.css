@@ -237,3 +237,21 @@ button { cursor: pointer; }
 .more-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 199;
 }
+
+/* ── Modal overrides — always solid, never glass ── */
+[style*="position: fixed"][style*="zIndex: 100"],
+[style*="position: fixed"][style*="zIndex: 200"] {
+  --bg-card: #ffffff;
+  --bg-primary: #F8FAFC;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --text-tertiary: #94A3B8;
+}
+
+/* Force all modal inputs to be fully opaque */
+.modal-input,
+dialog input, dialog select, dialog textarea {
+  background: #F8FAFC !important;
+  color: #0F172A !important;
+  border: 1.5px solid #E2E8F0 !important;
+}
