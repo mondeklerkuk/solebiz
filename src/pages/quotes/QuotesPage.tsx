@@ -5,13 +5,13 @@ import QuoteModal from './QuoteModal';
 import DocumentViewer from './DocumentViewer';
 
 export const QUOTE_STATUS_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  draft:    { bg: 'var(--bg-primary)', text: 'var(--text-primary)', border: 'rgba(142,142,147,0.2)' },
-  sent:     { bg: 'rgba(0,113,227,0.12)', text: 'var(--accent-blue)', border: 'rgba(0,113,227,0.3)' },
-  viewed:   { bg: 'rgba(255,159,10,0.12)', text: 'var(--accent-orange)', border: 'rgba(255,159,10,0.3)' },
-  accepted: { bg: 'rgba(48,209,88,0.12)', text: 'var(--accent-green)', border: 'rgba(48,209,88,0.3)' },
-  declined: { bg: 'rgba(255,59,48,0.12)', text: 'var(--accent-red)', border: 'rgba(255,59,48,0.3)' },
-  invoiced: { bg: 'rgba(191,90,242,0.12)', text: 'var(--accent-purple)', border: 'rgba(191,90,242,0.3)' },
-  paid:     { bg: 'rgba(48,209,88,0.12)', text: 'var(--accent-green)', border: 'rgba(48,209,88,0.3)' },
+  draft:    { bg: '#F1F5F9', text: '#475569',  border: '#CBD5E1' },
+  sent:     { bg: '#EFF6FF', text: '#2563EB',  border: '#BFDBFE' },
+  viewed:   { bg: '#FFFBEB', text: '#D97706',  border: '#FDE68A' },
+  accepted: { bg: '#F0FDF4', text: '#16A34A',  border: '#BBF7D0' },
+  declined: { bg: '#FEF2F2', text: '#DC2626',  border: '#FECACA' },
+  invoiced: { bg: '#F5F3FF', text: '#7C3AED',  border: '#DDD6FE' },
+  paid:     { bg: '#ECFDF5', text: '#059669',  border: '#6EE7B7' },
 };
 
 export const QUOTE_STATUS_LABELS: Record<string, string> = {
@@ -27,7 +27,7 @@ export default function QuotesPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingQuote, setEditingQuote] = useState<any>(null);
   const [viewingQuote, setViewingQuote] = useState<any>(null);
-  const [filter, setFilter] = useState<'all' | 'quotes' | 'invoices'>('all');
+  const [tab, setTab] = useState<'quotes' | 'invoices'>('quotes');
 
   useEffect(() => { if (user) { fetchQuotes(); fetchClients(); } }, [user]);
 
@@ -47,100 +47,117 @@ export default function QuotesPage() {
     setClients(data || []);
   }
 
-  const filtered = quotes.filter(q => {
-    if (filter === 'quotes') return !q.is_invoice;
-    if (filter === 'invoices') return q.is_invoice;
-    return true;
-  });
+  const allQuotes = quotes.filter(q => !q.is_invoice);
+  const allInvoices = quotes.filter(q => q.is_invoice);
 
-  const totalValue = filtered.reduce((sum, q) => sum + (q.total || 0), 0);
-  const paidValue = filtered.filter(q => q.status === 'paid').reduce((sum, q) => sum + (q.total || 0), 0);
-  const outstanding = totalValue - paidValue;
+  // Quote stats
+  const quotesTotal = allQuotes.reduce((s, q) => s + (q.total || 0), 0);
+  const quotesSent = allQuotes.filter(q => ['sent','viewed'].includes(q.status)).length;
+  const quotesAccepted = allQuotes.filter(q => q.status === 'accepted').length;
 
-  const userProfile = {
-    business_name: user?.user_metadata?.business_name || 'My Business',
-    email: user?.email,
-    phone: user?.user_metadata?.phone,
-    address: user?.user_metadata?.address,
-  };
+  // Invoice stats
+  const invoicesPaid = allInvoices.filter(q => q.status === 'paid').reduce((s, q) => s + (q.total || 0), 0);
+  const invoicesOutstanding = allInvoices.filter(q => q.status !== 'paid').reduce((s, q) => s + (q.total || 0), 0);
+  const invoicesOverdue = allInvoices.filter(q =>
+    q.status !== 'paid' && q.due_date && new Date(q.due_date) < new Date()
+  ).length;
+
+  const filtered = tab === 'quotes' ? allQuotes : allInvoices;
 
   return (
     <div style={s.page}>
+      {/* Header */}
       <div style={s.header}>
         <div>
           <h1 style={s.title}>Quotes & Invoices</h1>
-          <p style={s.subtitle}>{filtered.length} document{filtered.length !== 1 ? 's' : ''}</p>
+          <p style={s.subtitle}>Create quotes, convert to invoices, track payments</p>
         </div>
-        <button style={s.addBtn} onClick={() => { setEditingQuote(null); setModalOpen(true); }}>+ New Quote</button>
+        <button style={s.addBtn} onClick={() => { setEditingQuote(null); setModalOpen(true); }}>
+          + New {tab === 'quotes' ? 'Quote' : 'Invoice'}
+        </button>
       </div>
 
-      {/* Stats */}
-      <div style={s.statsRow}>
-        {[
-          { label: 'Total Value', value: `£${totalValue.toFixed(2)}`, color: 'var(--text-primary)' },
-          { label: 'Paid', value: `£${paidValue.toFixed(2)}`, color: '#059669' },
-          { label: 'Outstanding', value: `£${outstanding.toFixed(2)}`, color: outstanding > 0 ? '#D97706' : '#059669' },
-        ].map(st => (
-          <div key={st.label} style={s.stat}>
-            <div style={s.statLabel}>{st.label}</div>
-            <div style={{ ...s.statValue, color: st.color }}>{st.value}</div>
-          </div>
-        ))}
+      {/* Tab switcher */}
+      <div style={s.tabs}>
+        <button style={{ ...s.tabBtn, ...(tab === 'quotes' ? s.tabActive : {}) }} onClick={() => setTab('quotes')}>
+          📋 Quotes
+          {allQuotes.length > 0 && <span style={{ ...s.tabCount, background: tab === 'quotes' ? '#2563EB' : '#E2E8F0', color: tab === 'quotes' ? '#fff' : '#64748B' }}>{allQuotes.length}</span>}
+        </button>
+        <button style={{ ...s.tabBtn, ...(tab === 'invoices' ? s.tabActive : {}) }} onClick={() => setTab('invoices')}>
+          🧾 Invoices
+          {allInvoices.length > 0 && <span style={{ ...s.tabCount, background: tab === 'invoices' ? '#2563EB' : '#E2E8F0', color: tab === 'invoices' ? '#fff' : '#64748B' }}>{allInvoices.length}</span>}
+        </button>
       </div>
 
-      {/* Filters */}
-      <div style={s.filters}>
-        {(['all', 'quotes', 'invoices'] as const).map(f => (
-          <button key={f} style={{ ...s.filterBtn, ...(filter === f ? s.filterActive : {}) }} onClick={() => setFilter(f)}>
-            {f.charAt(0).toUpperCase() + f.slice(1)}
-          </button>
-        ))}
-      </div>
+      {/* Stats — different for quotes vs invoices */}
+      {tab === 'quotes' ? (
+        <div style={s.statsRow}>
+          <StatCard label="Total Quotes" value={String(allQuotes.length)} sub="all time" color="#2563EB" />
+          <StatCard label="Awaiting Response" value={String(quotesSent)} sub="sent or viewed" color="#D97706" />
+          <StatCard label="Accepted" value={String(quotesAccepted)} sub="approved by client" color="#16A34A" />
+          <StatCard label="Total Value" value={`£${quotesTotal.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub="across all quotes" color="#7C3AED" />
+        </div>
+      ) : (
+        <div style={s.statsRow}>
+          <StatCard label="Paid" value={`£${invoicesPaid.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub="collected" color="#059669" />
+          <StatCard label="Outstanding" value={`£${invoicesOutstanding.toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`} sub="awaiting payment" color={invoicesOutstanding > 0 ? '#D97706' : '#059669'} />
+          <StatCard label="Overdue" value={String(invoicesOverdue)} sub={invoicesOverdue === 0 ? 'none overdue' : 'past due date'} color={invoicesOverdue > 0 ? '#DC2626' : '#059669'} />
+          <StatCard label="Total Invoiced" value={String(allInvoices.length)} sub="invoices raised" color="#2563EB" />
+        </div>
+      )}
 
+      {/* Document list */}
       {loading ? (
         <div style={s.loading}>Loading…</div>
       ) : filtered.length === 0 ? (
         <div style={s.empty}>
-          <span style={{ fontSize: 40 }}>📋</span>
-          <p style={{ color: 'var(--text-tertiary)', fontWeight: 500 }}>No documents yet. Create your first quote!</p>
+          <div style={{ fontSize: 48, marginBottom: 12 }}>{tab === 'quotes' ? '📋' : '🧾'}</div>
+          <div style={s.emptyTitle}>No {tab} yet</div>
+          <p style={s.emptyDesc}>
+            {tab === 'quotes'
+              ? 'Create your first quote to send to a client.'
+              : 'Convert an accepted quote to an invoice, or create one directly.'}
+          </p>
+          <button style={s.emptyBtn} onClick={() => { setEditingQuote(null); setModalOpen(true); }}>
+            + Create {tab === 'quotes' ? 'Quote' : 'Invoice'}
+          </button>
         </div>
       ) : (
         <div style={s.table}>
-          {/* Header */}
           <div style={s.tableHeader}>
-            <span style={{ flex: '0 0 120px' }}>Number</span>
+            <span style={{ flex: '0 0 130px' }}>#</span>
             <span style={{ flex: 1 }}>Client</span>
-            <span style={{ flex: '0 0 110px', display: window.innerWidth < 600 ? 'none' : 'block' }}>Date</span>
-            <span style={{ flex: '0 0 100px', textAlign: 'right' }}>Amount</span>
-            <span style={{ flex: '0 0 110px' }}>Status</span>
-            <span style={{ flex: '0 0 100px', textAlign: 'center' }}>Actions</span>
+            <span style={{ flex: '0 0 90px' }}>Date</span>
+            <span style={{ flex: '0 0 110px', textAlign: 'right' }}>Amount</span>
+            <span style={{ flex: '0 0 110px', textAlign: 'center' }}>Status</span>
+            <span style={{ flex: '0 0 80px', textAlign: 'center' }}>Actions</span>
           </div>
           {filtered.map(q => {
             const col = QUOTE_STATUS_COLORS[q.status] || QUOTE_STATUS_COLORS.draft;
+            const isOverdue = q.is_invoice && q.status !== 'paid' && q.due_date && new Date(q.due_date) < new Date();
             return (
-              <div key={q.id} style={s.tableRow} onClick={() => { setEditingQuote(q); setModalOpen(true); }}>
-                <span style={{ flex: '0 0 120px', fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--accent-blue)' }}>{q.quote_number}</span>
-                <span style={{ flex: 1, fontSize: 'var(--text-13)', color: 'var(--text-primary)', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {q.client?.name || '—'}
+              <div key={q.id} style={s.tableRow}>
+                <span style={{ flex: '0 0 130px' }}>
+                  <span style={s.docNum}>{q.quote_number}</span>
                 </span>
-                <span style={{ flex: '0 0 110px', fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', display: window.innerWidth < 600 ? 'none' : 'block' }}>
+                <span style={{ flex: 1, fontSize: 14, color: '#0F172A', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {q.client?.name || <span style={{ color: '#94A3B8', fontStyle: 'italic' }}>No client</span>}
+                </span>
+                <span style={{ flex: '0 0 90px', fontSize: 13, color: '#64748B' }}>
                   {new Date(q.issue_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}
+                  {isOverdue && <span style={s.overduePip}>!</span>}
                 </span>
-                <span style={{ flex: '0 0 100px', fontSize: 'var(--text-13)', fontWeight: 700, color: 'var(--text-primary)', textAlign: 'right' }}>
-                  £{(q.total || 0).toFixed(2)}
+                <span style={{ flex: '0 0 110px', fontSize: 15, fontWeight: 700, color: '#0F172A', textAlign: 'right' }}>
+                  £{(q.total || 0).toLocaleString('en-GB', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </span>
-                <span style={{ flex: '0 0 110px' }}>
+                <span style={{ flex: '0 0 110px', textAlign: 'center' }}>
                   <span style={{ ...s.badge, background: col.bg, color: col.text, border: `1px solid ${col.border}` }}>
-                    {q.is_invoice ? '🧾 ' : '📋 '}{QUOTE_STATUS_LABELS[q.status]}
+                    {QUOTE_STATUS_LABELS[q.status]}
                   </span>
                 </span>
-                <div style={{ flex: '0 0 100px', display: 'flex', gap: 6, justifyContent: 'center' }} onClick={e => e.stopPropagation()}>
-                  <button style={s.viewBtn} onClick={() => setViewingQuote(q)} title="Preview & Send">
-                    📤
-                  </button>
-                  <button style={s.editBtn} onClick={() => { setEditingQuote(q); setModalOpen(true); }} title="Edit">
-                    ✏️
-                  </button>
+                <div style={{ flex: '0 0 80px', display: 'flex', gap: 6, justifyContent: 'center' }}>
+                  <button style={s.actionBtn} title="Preview & Send" onClick={() => setViewingQuote(q)}>📤</button>
+                  <button style={s.actionBtn} title="Edit" onClick={() => { setEditingQuote(q); setModalOpen(true); }}>✏️</button>
                 </div>
               </div>
             );
@@ -148,18 +165,28 @@ export default function QuotesPage() {
         </div>
       )}
 
-      {/* Edit modal */}
       {modalOpen && (
-        <QuoteModal quote={editingQuote} clients={clients} userId={user.id} userEmail={user.email || ''}
-          onClose={() => setModalOpen(false)} onSaved={() => { setModalOpen(false); fetchQuotes(); }} />
+        <QuoteModal
+          quote={editingQuote}
+          clients={clients}
+          userId={user.id}
+          userEmail={user.email || ''}
+          defaultInvoice={tab === 'invoices'}
+          onClose={() => setModalOpen(false)}
+          onSaved={() => { setModalOpen(false); fetchQuotes(); }}
+        />
       )}
 
-      {/* Document viewer + share */}
       {viewingQuote && (
         <DocumentViewer
           quote={viewingQuote}
           client={viewingQuote.client}
-          userProfile={userProfile}
+          userProfile={{
+            business_name: user?.user_metadata?.business_name || 'My Business',
+            email: user?.email,
+            phone: user?.user_metadata?.phone,
+            address: user?.user_metadata?.address,
+          }}
           onClose={() => { setViewingQuote(null); fetchQuotes(); }}
         />
       )}
@@ -167,25 +194,46 @@ export default function QuotesPage() {
   );
 }
 
+function StatCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
+  return (
+    <div style={sc.card}>
+      <div style={{ ...sc.dot, background: color }} />
+      <div style={{ ...sc.value, color }}>{value}</div>
+      <div style={sc.label}>{label}</div>
+      <div style={sc.sub}>{sub}</div>
+    </div>
+  );
+}
+
+const sc: Record<string, React.CSSProperties> = {
+  card: { flex: '1 1 140px', background: '#fff', borderRadius: 14, padding: '18px 18px', border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)' },
+  dot: { width: 8, height: 8, borderRadius: 4, marginBottom: 12 },
+  value: { fontSize: 'clamp(20px,3vw,26px)', fontWeight: 800, letterSpacing: '-0.8px', marginBottom: 2 },
+  label: { fontSize: 13, fontWeight: 600, color: '#0F172A', marginBottom: 2 },
+  sub: { fontSize: 12, color: '#94A3B8' },
+};
+
 const s: Record<string, React.CSSProperties> = {
-  page: { padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,40px)', maxWidth: 960, margin: '0 auto' },
+  page: { padding: 'clamp(20px,4vw,40px) clamp(16px,4vw,40px)', maxWidth: 1000, margin: '0 auto' },
   header: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, gap: 12 },
-  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.8px' },
-  subtitle: { fontSize: 'var(--text-13)', color: 'var(--text-tertiary)', fontWeight: 500, marginTop: 4 },
-  addBtn: { background: 'var(--accent-blue)', color: 'var(--bg-card)', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 'var(--text-13)', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' },
-  statsRow: { display: 'flex', flexWrap: 'wrap', gap: 14, marginBottom: 24 },
-  stat: { flex: '1 1 140px', background: 'var(--bg-card)', borderRadius: 14, padding: '18px 20px', border: '1px solid #F1F5F9', boxShadow: 'var(--shadow-card)' },
-  statLabel: { fontSize: 'var(--text-11)', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em' },
-  statValue: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, letterSpacing: '-0.8px' },
-  filters: { display: 'flex', gap: 8, marginBottom: 18, flexWrap: 'wrap' },
-  filterBtn: { padding: '7px 18px', borderRadius: 20, border: '1.5px solid #E2E8F0', background: 'var(--bg-card)', cursor: 'pointer', fontSize: 'var(--text-13)', fontWeight: 600, color: 'var(--text-secondary)' },
-  filterActive: { background: 'var(--text-primary)', color: 'var(--bg-card)', border: '1.5px solid #0F172A' },
-  loading: { textAlign: 'center', color: 'var(--text-tertiary)', padding: 48, fontWeight: 500 },
-  empty: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12, padding: '60px 0' },
-  table: { background: 'var(--bg-card)', borderRadius: 16, border: '1px solid #F1F5F9', boxShadow: 'var(--shadow-card)', overflow: 'hidden' },
-  tableHeader: { display: 'flex', alignItems: 'center', gap: 12, padding: '12px 20px', background: 'var(--bg-primary)', borderBottom: '1px solid #E2E8F0', fontSize: 'var(--text-11)', fontWeight: 800, color: 'var(--text-tertiary)', letterSpacing: '0.06em' },
-  tableRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', borderBottom: '1px solid #F8FAFC', cursor: 'pointer', transition: 'background 0.1s' },
-  badge: { fontSize: 'var(--text-11)', padding: '3px 10px', borderRadius: 20, fontWeight: 700, display: 'inline-block', whiteSpace: 'nowrap' },
-  viewBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#EFF6FF', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--text-13)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  editBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: 'var(--bg-primary)', borderRadius: 8, cursor: 'pointer', fontSize: 'var(--text-13)', display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  title: { fontSize: 'clamp(20px,4vw,26px)', fontWeight: 800, color: '#0F172A', letterSpacing: '-0.8px' },
+  subtitle: { fontSize: 13, color: '#94A3B8', fontWeight: 400, marginTop: 4 },
+  addBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 12, padding: '11px 22px', fontSize: 14, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit' },
+  tabs: { display: 'flex', gap: 4, marginBottom: 24, background: '#F1F5F9', borderRadius: 12, padding: 4, width: 'fit-content' },
+  tabBtn: { display: 'flex', alignItems: 'center', gap: 8, padding: '9px 20px', borderRadius: 10, border: 'none', background: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 600, color: '#64748B', fontFamily: 'inherit', transition: 'all 0.15s' },
+  tabActive: { background: '#fff', color: '#0F172A', boxShadow: '0 1px 4px rgba(0,0,0,0.1)' },
+  tabCount: { fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 20, minWidth: 20, textAlign: 'center' },
+  statsRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 12, marginBottom: 24 },
+  loading: { textAlign: 'center', color: '#94A3B8', padding: 48, fontWeight: 500 },
+  empty: { display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '60px 20px', textAlign: 'center' },
+  emptyTitle: { fontSize: 18, fontWeight: 700, color: '#0F172A', marginBottom: 8 },
+  emptyDesc: { fontSize: 14, color: '#64748B', lineHeight: 1.6, maxWidth: 360, marginBottom: 24 },
+  emptyBtn: { background: '#2563EB', color: '#fff', border: 'none', borderRadius: 10, padding: '11px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' },
+  table: { background: '#fff', borderRadius: 16, border: '1px solid #F1F5F9', boxShadow: '0 1px 3px rgba(0,0,0,0.04)', overflow: 'hidden' },
+  tableHeader: { display: 'flex', alignItems: 'center', gap: 12, padding: '11px 20px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', fontSize: 11, fontWeight: 700, color: '#94A3B8', letterSpacing: '0.06em', textTransform: 'uppercase' },
+  tableRow: { display: 'flex', alignItems: 'center', gap: 12, padding: '14px 20px', borderBottom: '1px solid #F8FAFC' },
+  docNum: { fontSize: 13, fontWeight: 700, color: '#2563EB', fontFamily: 'monospace' },
+  overduePip: { display: 'inline-flex', width: 16, height: 16, background: '#DC2626', color: '#fff', borderRadius: 8, fontSize: 10, fontWeight: 800, alignItems: 'center', justifyContent: 'center', marginLeft: 4 },
+  badge: { fontSize: 11, padding: '4px 10px', borderRadius: 20, fontWeight: 700, display: 'inline-block', whiteSpace: 'nowrap' },
+  actionBtn: { width: 32, height: 32, border: '1px solid #E2E8F0', background: '#F8FAFC', borderRadius: 8, cursor: 'pointer', fontSize: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'inherit' },
 };

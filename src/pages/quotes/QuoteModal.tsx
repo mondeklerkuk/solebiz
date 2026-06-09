@@ -13,9 +13,9 @@ function nextNum(isInv: boolean, existing: any[]) {
   return `${prefix}-${year}-${String(next).padStart(3,'0')}`;
 }
 
-export default function QuoteModal({ quote, clients, userId, onClose, onSaved }: any) {
+export default function QuoteModal({ quote, clients, userId, onClose, onSaved, defaultInvoice }: any) {
   const isEdit = !!quote;
-  const [isInvoice, setIsInvoice] = useState(quote?.is_invoice || false);
+  const [isInvoice, setIsInvoice] = useState(quote?.is_invoice ?? defaultInvoice ?? false);
   const [status, setStatus] = useState(quote?.status || 'draft');
   const [clientId, setClientId] = useState(quote?.client_id || '');
   const [qNum, setQNum] = useState(quote?.quote_number || '');
