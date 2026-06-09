@@ -114,9 +114,10 @@ export default function QuoteModal({ quote, clients: initialClients, userId, onC
     if (!name) return;
     setAddingClient(true);
     try {
+      const now = new Date().toISOString();
       const { data, error: e } = await supabase
         .from('clients')
-        .insert({ name, user_id: userId, created_at: new Date().toISOString() })
+        .insert({ name, user_id: userId, updated_at: now })
         .select()
         .single();
       if (e) throw e;
