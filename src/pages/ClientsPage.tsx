@@ -143,12 +143,12 @@ function ContactChip({ icon, val }: any) {
 
 function ClientModal({ client, userId, onClose, onSaved }: any) {
   const isEdit = !!client;
-  const [form, setForm] = useState({ name: '', email: '', phone: '', company: '', address: '', notes: '' });
+  const [form, setForm] = useState({ name: '', email: '', phone: '', address: '', notes: '' });
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
-    if (client) setForm({ name: client.name || '', email: client.email || '', phone: client.phone || '', company: client.company || '', address: client.address || '', notes: client.notes || '' });
+    if (client) setForm({ name: client.name || '', email: client.email || '', phone: client.phone || '', address: client.address || '', notes: client.notes || '' });
   }, [client]);
 
   const set = (k: string) => (e: any) => setForm(f => ({ ...f, [k]: e.target.value }));
@@ -156,9 +156,11 @@ function ClientModal({ client, userId, onClose, onSaved }: any) {
   async function save() {
     if (!form.name.trim()) return;
     setSaving(true);
-    const payload = { ...form, user_id: userId, updated_at: new Date().toISOString() };
+    const now = new Date().toISOString();
+    const payload = { ...form, user_id: userId, created_at: now, updated_at: now };
+    const updatePayload = { ...form, user_id: userId, updated_at: now };
     if (isEdit) {
-      const { error } = await supabase.from('clients').update(payload).eq('id', client.id);
+      const { error } = await supabase.from('clients').update(updatePayload).eq('id', client.id);
       if (error) console.error('Update error:', error);
     } else {
       const { error } = await supabase.from('clients').insert({ ...payload });
@@ -183,7 +185,7 @@ function ClientModal({ client, userId, onClose, onSaved }: any) {
           <button style={m.x} onClick={onClose}>✕</button>
         </div>
         <div style={m.body}>
-          {[['name','Client name *','John Smith'],['company','Company (optional)','Acme Ltd'],['email','Email','john@example.com'],['phone','Phone','+44 7700 900000'],['address','Address','123 High Street, London']].map(([k,lbl,ph]) => (
+          {[['name','Client name *','John Smith'],['email','Email','john@example.com'],['phone','Phone','+44 7700 900000'],['address','Address','123 High Street, London']].map(([k,lbl,ph]) => (
             <div key={k} style={{ marginBottom: 14 }}>
               <label style={m.lbl}>{lbl}</label>
               <input style={m.inp} value={(form as any)[k]} onChange={set(k)} placeholder={ph} />

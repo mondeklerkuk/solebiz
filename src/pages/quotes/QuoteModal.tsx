@@ -63,6 +63,7 @@ export default function QuoteModal({ quote, clients: initialClients, userId, onC
     if (!qNum) { setError('Quote number is required'); return; }
     setSaving(true); setError('');
     try {
+      const now = new Date().toISOString();
       const payload = {
         user_id: userId, client_id: clientId || null, quote_number: qNum,
         status, is_invoice: isInvoice, issue_date: issueDate,
@@ -70,13 +71,14 @@ export default function QuoteModal({ quote, clients: initialClients, userId, onC
         notes: notes || null, subtotal,
         vat_rate: vatEnabled ? 20 : 0,
         vat_amount: vatAmt, total,
-        updated_at: new Date().toISOString(),
+        created_at: now,
+        updated_at: now,
       };
       let qId = quote?.id;
       if (isEdit) {
         await supabase.from('quotes').update(payload).eq('id', qId);
       } else {
-        const { data, error: e } = await supabase.from('quotes').insert(payload).select().single();
+        const { data, error: e } = await supabase.from('quotes').insert(insertPayload).select().single();
         if (e) throw e;
         qId = data?.id;
       }
@@ -117,7 +119,7 @@ export default function QuoteModal({ quote, clients: initialClients, userId, onC
       const now = new Date().toISOString();
       const { data, error: e } = await supabase
         .from('clients')
-        .insert({ name, user_id: userId, updated_at: now })
+        .insert({ name, user_id: userId, created_at: now, updated_at: now })
         .select()
         .single();
       if (e) throw e;
