@@ -76,9 +76,10 @@ export default function QuoteModal({ quote, clients: initialClients, userId, onC
       };
       let qId = quote?.id;
       if (isEdit) {
-        await supabase.from('quotes').update(payload).eq('id', qId);
+        const { created_at: _ca, ...updatePayload } = payload;
+        await supabase.from('quotes').update(updatePayload).eq('id', qId);
       } else {
-        const { data, error: e } = await supabase.from('quotes').insert(insertPayload).select().single();
+        const { data, error: e } = await supabase.from('quotes').insert(payload).select().single();
         if (e) throw e;
         qId = data?.id;
       }
