@@ -147,7 +147,7 @@ function AppRoutes() {
   const renderPage = () => {
     if (page === 'jobs')     return <JobsPage />;
     if (page === 'quotes')   return <QuotesPage />;
-    if (page === 'sourcing') return <SourcingPage />;
+    if (page === 'sourcing') return <SourcingPage onNavigate={(p: any) => setPage(p)} />;
     if (page === 'clients')  return <ClientsPage />;
     if (page === 'finance')  return <ComingSoon label="Finance" icon="💰" />;
     if (page === 'settings') return <Settings />;
