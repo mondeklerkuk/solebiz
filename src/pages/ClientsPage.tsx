@@ -244,13 +244,13 @@ const s: Record<string, React.CSSProperties> = {
 };
 
 const m: Record<string, React.CSSProperties> = {
-  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: 16 },
-  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)' },
+  overlay: { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 200, padding: '24px 16px', overflowY: 'auto' },
+  modal: { background: '#fff', borderRadius: 18, width: '100%', maxWidth: 480, display: 'flex', flexDirection: 'column', boxShadow: '0 20px 60px rgba(0,0,0,0.2)', maxHeight: 'calc(100vh - 48px)' },
   hdr: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '20px 24px', borderBottom: '1px solid #F1F5F9' },
   htitle: { fontSize: 17, fontWeight: 800, color: '#0F172A' },
   x: { background: 'none', border: 'none', fontSize: 'var(--text-17)', cursor: 'pointer', color: '#94A3B8' },
-  body: { padding: '20px 24px', overflowY: 'auto' },
-  footer: { padding: '14px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center' },
+  body: { padding: '20px 24px', overflowY: 'auto', flex: 1, minHeight: 0 },
+  footer: { padding: '14px 24px', borderTop: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', flexShrink: 0, background: '#fff', borderRadius: '0 0 18px 18px' },
   lbl: { display: 'block', fontSize: 'var(--text-11)', fontWeight: 700, color: '#94A3B8', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' },
   inp: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', boxSizing: 'border-box' },
   ta: { width: '100%', padding: '11px 13px', border: '1.5px solid #E2E8F0', borderRadius: 10, fontSize: 'var(--text-13)', color: '#0F172A', background: '#F8FAFC', fontFamily: 'inherit', resize: 'vertical', boxSizing: 'border-box' },
